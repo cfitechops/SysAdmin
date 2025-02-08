@@ -9,7 +9,7 @@ sudo ufw allow bind9
 
 #### Configuration de l'interface réseau
 
-- Attribuez une adresse IP statique à chaque serveur DNS. Voici un exemple pour le serveur primaire :
+- Attribuez une adresse IP statique à chaque serveur DNS. Voici un exemple pour le serveur primaire 
 
 ```sh
 sudo nano /etc/netplan/cfg-static-ip.yaml
