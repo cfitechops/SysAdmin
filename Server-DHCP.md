@@ -8,7 +8,7 @@ apt-get install isc-dhcp-server vim iptables-persistent -y
 
 #### Configuration de l'interface pour le serveur DHCP
 
-- Sauvegardez le fichier de configuration par défaut :
+- Sauvegardez le fichier de configuration par défaut 
 
 ```sh
 cp /etc/default/isc-dhcp-server /etc/default/isc-dhcp-server.bkp
@@ -40,7 +40,7 @@ network:
   ethernets:
     enp0s3:
       addresses:
-        - 192.168.10.1/24  # Adresse IP statique du serveur DHCP
+        - 192.168.10.2/24  # Adresse IP statique du serveur DHCP
       nameservers:
         addresses: [8.8.8.8, 8.8.4.4]  # Serveurs DNS publics ou internes
       routes:
@@ -81,7 +81,7 @@ ddns-update-style none;  # Désactiver les mises à jour dynamiques DNS
 
 # Configuration du sous-réseau principal (LAN)
 subnet 192.168.10.0 netmask 255.255.255.0 {
-    range 192.168.10.100 192.168.10.200;    # Plage d'adresses IP dynamiques attribuées aux clients DHCP
+    range 192.168.10.50 192.168.10.200;    # Plage d'adresses IP dynamiques attribuées aux clients DHCP
     option routers 192.168.10.1;           # Adresse IP du serveur DHCP (passerelle par défaut)
     option subnet-mask 255.255.255.0;      # Masque de sous-réseau
     option domain-name-servers 192.168.10.2, 8.8.8.8;  # DNS interne et externe

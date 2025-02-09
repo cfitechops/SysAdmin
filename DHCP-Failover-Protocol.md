@@ -4,7 +4,7 @@
 
 ```sh
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y isc-dhcp-server vim net-tools build-essential linux-headers-$(uname -r)
+sudo apt install -y isc-dhcp-server wireshark vim net-tools build-essential linux-headers-$(uname -r)
 ```
 
 #### Configuration de l'adresse IP statique pour le serveur principal
