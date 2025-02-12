@@ -1,30 +1,60 @@
-#### Créer deux serveurs DNS avec BIND9 dans des conteneurs Docker
+#### Modifier le fichier Netplan
 
-- **container-patata** : Gère la zone principale patata.com.
-- **container-tortilla** : Gère le sous-domaine délégué tortilla.patata.com.
+- Modifiez le fichier /etc/netplan/50-cloud-init.yaml
+
+```sh
+sudo nano /etc/netplan/50-cloud-init.yaml
+```
+
+- Remplacez le contenu par
+
+```sh
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    enp0s3:
+      dhcp4: false
+      addresses:
+        - 192.168.2.22/24
+      routes:
+        - to: default
+          via: 192.168.2.1
+      nameservers:
+        addresses: [8.8.8.8, 8.8.4.4]
+```
+
+#### Appliquer les modifications
+
+- Appliquez les modifications avec Netplan
+
+```sh
+sudo netplan apply
+```
+
+#### Vérifier la nouvelle configuration
+
+- Vérifiez que votre interface réseau utilise bien la nouvelle adresse IP
+
+```sh
+ip addr show enp0s3
+```
 
 #### Créer un réseau Docker personnalisé
 
-- Créez un réseau Docker avec une plage d'adresses IP dédiée
+- Créez un réseau Docker avec une plage sûre, comme 172.18.x.x
 
 ```sh
-docker network create --subnet=192.168.128.0/23 red-cocina
+docker network create --subnet=172.18.0.0/16 red-cocina
 ```
 
-#### Configurer les fichiers de zones DNS
+#### Préparer les fichiers de configuration DNS
 
-- Structure des dossiers
-  - Créez des dossiers pour chaque serveur DNS et leurs configurations
-
-```sh
-mkdir -p ~/dns-config/patata-config ~/dns-config/tortilla-config
-```
-
-#### Fichiers de configuration pour container-patata
-
-- Fichier named.conf.local
+- Créez les fichiers nécessaires pour vos serveurs DNS dans des dossiers séparés.
+  - Configuration pour container-patata
 
 ```sh
+mkdir -p ~/dns-config/patata-config/
 nano ~/dns-config/patata-config/named.conf.local
 ```
 
@@ -40,8 +70,6 @@ zone "tortilla.patata.com" {
     type delegation-only;
 };
 ```
-
-- Fichier db.patata.com
 
 ```sh
 nano ~/dns-config/patata-config/db.patata.com
@@ -60,9 +88,9 @@ $TTL    604800
                         )
 
         IN      NS      ns.patata.com.
-        IN      A       192.168.129.102
-        
-ns      IN      A       192.168.129.102
+        IN      A       172.18.0.102
+
+ns      IN      A       172.18.0.102
 
 filete  IN      A       1.1.1.1
 queso   IN      A       2.2.2.2
@@ -70,11 +98,10 @@ queso   IN      A       2.2.2.2
 tortilla IN      NS      ns.tortilla.patata.com.
 ```
 
-#### Fichiers de configuration pour container-tortilla
-
-- Fichier named.conf.local
+- Configuration pour container-tortilla
 
 ```sh
+mkdir -p ~/dns-config/tortilla-config/
 nano ~/dns-config/tortilla-config/named.conf.local
 ```
 
@@ -87,8 +114,6 @@ zone "tortilla.patata.com" {
 };
 ```
 
-- Fichier db.tortilla.patata.com
-
 ```sh
 nano ~/dns-config/tortilla-config/db.tortilla.patata.com
 ```
@@ -97,18 +122,17 @@ nano ~/dns-config/tortilla-config/db.tortilla.patata.com
 
 ```sh
 $TTL    604800
-@       IN      SOA     ns.tortilla.patata.com. root.tortilla.patata.com. (
+@       IN      SOA     ns.tortilla.patata.com.root.tortilla.patata.com (
                         2025040201 ; Serial
                         10h        ; Refresh interval
                         15m        ; Retry interval
                         48h        ; Expire interval
-                        604800     ; Negative Cache TTL
                         )
 
         IN      NS      ns.tortilla.patata.com.
-        IN      A       192.168.129.103
+        IN      A       172.18.0.103
 
-ns      IN      A       192.168.129.103
+ns      IN      A       172.18.0.103
 
 cebolla IN      A       3.3.3.3
 chorizo IN      A       4.4.4.4
@@ -116,8 +140,7 @@ chorizo IN      A       4.4.4.4
 
 #### Créer un fichier Docker Compose
 
-- Utilisez Docker Compose pour automatiser le déploiement des serveurs DNS.
-  - Créez un fichier docker-compose.yml
+- Créez un fichier docker-compose.yml pour automatiser le déploiement des conteneurs.
 
 ```sh
 nano ~/dns-config/docker-compose.yml
@@ -133,7 +156,7 @@ services:
     container_name: container-patata
     networks:
       red-cocina:
-        ipv4_address: 192.168.129.102
+        ipv4_address: 172.18.0.102
     volumes:
       - ./patata-config:/etc/bind/
     ports:
@@ -145,7 +168,7 @@ services:
     container_name: container-tortilla
     networks:
       red-cocina:
-        ipv4_address: 192.168.129.103
+        ipv4_address: 172.18.0.103
     volumes:
       - ./tortilla-config:/etc/bind/
     ports:
@@ -157,52 +180,34 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 192.168.128.0/23
+        - subnet: 172.18.0.0/16
 ```
 
-#### Déployer les serveurs DNS
+#### Lancer les conteneurs
 
-- Positionnez-vous dans le dossier contenant docker-compose.yml
+- Positionnez-vous dans le dossier contenant le fichier docker-compose.yml
 
 ```sh
 cd ~/dns-config/
-```
-
-- Lancez les services avec Docker Compose
-
-```sh
 docker-compose up -d
 ```
 
-- Vérifiez que les conteneurs sont en cours d'exécution
+- Vérifiez que les conteneurs fonctionnent correctement
 
 ```sh
 docker ps
 ```
 
-#### Tester la résolution DNS
-
-- Installez les outils DNS si ce n'est pas déjà fait (sur la machine hôte)
+- Installez les outils DNS sur votre machine hôte si ce n'est pas déjà fait
 
 ```sh
 sudo apt update && sudo apt install dnsutils -y
 ```
 
-- Tester les enregistrements sur container-patata (192.168.129.102)
+- Tester sur container-patata (172.18.0.102)
 
 ```sh
-nslookup filete.patata.com 192.168.129.102
-nslookup queso.patata.com 192.168.129.102
-nslookup tortilla.patata.com 192.168.129.102
+nslookup filete.patata.com 172.18.0.102
+nslookup queso.patata.com 172.18.0.102
+nslookup tortilla.patata.com 172.18.0.103
 ```
-
-- Tester les enregistrements sur container-tortilla (192.168.129.103)
-
-```sh
-nslookup cebolla.tortilla.patata.com 192.168.129.103
-nslookup chorizo.tortilla.patata.com 192.168.129.103
-```
-
-#### Note:
-
-- DNS robuste et portable grâce à Docker, adaptée aux environnements professionnels.
