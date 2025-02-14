@@ -255,8 +255,11 @@ sudo apache2ctl configtest
 
 ```sh
 sudo systemctl reload apache2 && sudo systemctl restart apache2
+```
 
-# Désactivez également le site par défaut si ce n'est pas encore fait.
+- Désactivez également le site par défaut si ce n'est pas encore fait.
+
+```sh
 sudo a2dissite 000-default.conf
 ```
 
@@ -289,4 +292,4 @@ curl -k https://cfitech-it.com
 
 #### Note:
 
-- serveur DNS fonctionnel, d'un site web accessible via HTTP et HTTPS, ainsi que d'une infrastructure sécurisée prête à être utilisée dans un environnement professionnel.
+- Serveur DNS fonctionnel, d'un site web accessible via HTTP et HTTPS, ainsi que d'une infrastructure sécurisée prête à être utilisée dans un environnement professionnel.
