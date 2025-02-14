@@ -283,15 +283,15 @@ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 
 #### Remarque:
 
-- **-x509** Génère un certificat auto-signé.
+- **-x509** : Génère un certificat auto-signé.
 
-- **-nodes** Ne crypte pas la clé privée.
+- **-nodes** : Ne crypte pas la clé privée.
 
-- **-days 365** Définit la validité du certificat à 365 jours.
+- **-days 365** : Définit la validité du certificat à 365 jours.
 
-- **-newkey rsa:2048** Crée une nouvelle clé RSA de 2048 bits.
+- **-newkey rsa:2048** : Crée une nouvelle clé RSA de 2048 bits.
 
-- **-subj** Définit les informations du certificat (remplacez par vos données).
+- **-subj** : Définit les informations du certificat (remplacez par vos données).
 
 - Assurez-vous que les permissions des fichiers sont correctes
 
