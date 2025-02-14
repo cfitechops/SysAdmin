@@ -1,21 +1,41 @@
-#### Installation des paquets nécessaires
+# Configuration d'un Serveur DNS Primaire et Secondaire avec Bind9 sur Ubuntu
 
-- Sur chaque serveur DNS (primaire et secondaire), installez BIND9 et configurez les services nécessaires
+- Cette configuration met en place un serveur DNS primaire et secondaire avec zones directes et inversées. Elle inclut des bonnes pratiques pour garantir une configuration propre, sécurisée et fonctionnelle.
 
-```sh
-sudo apt update && sudo apt install bind9 bind9utils bind9-doc iptables-persistent -y
-sudo ufw allow bind9
-```
-
-#### Configuration de l'interface réseau
-
-- Attribuez une adresse IP statique à chaque serveur DNS. Voici un exemple pour le serveur primaire 
+- Mise à jour du système
 
 ```sh
-sudo nano /etc/netplan/cfg-static-ip.yaml
+sudo apt update && sudo apt upgrade -y
 ```
 
-- Ajoutez la configuration suivante pour le serveur primaire (192.168.10.2) :
+- Installez Bind9 et ses utilitaires 
+
+```sh
+sudo apt install bind9 bind9utils bind9-doc -y
+```
+
+- Activez le service Bind9 au démarrage
+
+```sh
+sudo systemctl enable bind9
+sudo systemctl start bind9
+```
+
+- Ouvrez le port DNS (53) dans le pare-feu
+
+```sh
+sudo ufw allow 53
+sudo ufw reload
+```
+
+- Configuration réseau (IP statique)
+  - Configuration du serveur primaire
+
+```sh
+sudo nano /etc/netplan/01-netcfg.yaml
+```
+
+- Ajoutez la configuration suivante
 
 ```sh
 network:
@@ -25,31 +45,33 @@ network:
     enp0s3:
       dhcp4: false
       addresses:
-        - 192.168.10.2/24
+        - 192.168.1.2/24
       routes:
         - to: default
-          via: 192.168.10.1
+          via: 192.168.1.1
       nameservers:
-        addresses: [192.168.10.2, 8.8.8.8]
+        addresses: [192.168.1.2]
 ```
 
-- Pour le serveur secondaire (192.168.10.3), modifiez l'adresse IP en conséquence.
-- Appliquez les modifications
+- Appliquez la configuration
 
 ```sh
 sudo netplan apply
 ```
 
-#### Configuration du serveur DNS primaire
+#### Configuration du serveur secondaire
 
-- Configurer les options globales
-  - Modifiez /etc/bind/named.conf.options pour définir les forwarders et autoriser les requêtes
+- Répétez les étapes ci-dessus pour le serveur secondaire en remplaçant l’adresse IP par 192.168.1.3
+
+- Configuration de Bind9 sur le Serveur Primaire
+
+  - Modifiez le fichier pour configurer les redirecteurs DNS
 
 ```sh
 sudo nano /etc/bind/named.conf.options
 ```
 
-- Ajoutez ou modifiez comme suit
+- Ajoutez ou modifiez les options suivantes
 
 ```sh
 options {
@@ -62,201 +84,146 @@ options {
 
     dnssec-validation auto;
 
-    listen-on {
-            any;
-            # 192.168.10.0/24;
-    };
-
+    listen-on { any; };
     listen-on-v6 { any; };
-
-    allow-query {
-            any; # Autorise toutes les requêtes si nécessaire.
-            
-            #192.168.10.47; Spécifier des équipes par exemple qui serait mon équipe host.
-    }; 
+    allow-query { any; };
 };
 ```
 
-- Redémarrez BIND9
+- Redémarrez Bind9 pour appliquer les modifications
 
 ```sh
 sudo systemctl restart bind9
 ```
 
-#### Configurer la zone principale
-
-- Modifiez /etc/bind/named.conf.local pour ajouter la zone principale
+- Ajoutez la configuration des zones directe et inversée
 
 ```sh
 sudo nano /etc/bind/named.conf.local
 ```
 
-- Ajoutez
+- Contenu du fichier
 
 ```sh
 zone "cfitech-it.com" {
     type master;
     file "/etc/bind/db.cfitech-it.com";
-    allow-transfer { 192.168.10.3; }; # Autorise le transfert vers le serveur secondaire
-    also-notify { 192.168.10.3; };   # Notifie le serveur secondaire des changements
+    allow-transfer { 192.168.1.3; }; # Autorise le transfert vers le serveur secondaire.
+    also-notify { 192.168.1.3; };   # Notifie le serveur secondaire des mises à jour.
 };
 
 zone "1.168.192.in-addr.arpa" {
     type master;
-    file "/etc/bind/db.1.168.192.in-addr.arpa";
+    file "/etc/bind/db.rev.cfitech-it.com";
 };
 ```
 
-#### Créer les fichiers de zones
-
-- Zone directe (cfitech-it.com)
-  - Créez le fichier de zone principale
+- Créez un fichier pour la zone directe
 
 ```sh
 sudo cp /etc/bind/db.local /etc/bind/db.cfitech-it.com
-
 sudo nano /etc/bind/db.cfitech-it.com
 ```
 
-- Modifiez comme suit
+- Contenu du fichier
 
 ```sh
 $TTL    604800
 @       IN      SOA     ns.cfitech-it.com. admin.cfitech-it.com. (
-                        2025040200 ; Serial (à incrémenter à chaque modification)
-                        10h        ; Refresh interval
-                        15m        ; Retry interval
-                        48h        ; Expire interval
-                        604800     ; Negative Cache TTL
-)
+                        2025040200 ; Serial (à incrémenter lors des modifications)
+                        10h        ; Refresh
+                        15m        ; Retry
+                        48h        ; Expire
+                        604800 )   ; Negative Cache TTL
 
 @       IN      NS      ns.cfitech-it.com.
 @       IN      NS      ns2.cfitech-it.com.
-ns      IN      A       192.168.10.2 # Serveur primaire DNS
-ns2     IN      A       192.168.10.3 # Serveur secondaire DNS
+@       IN      A       192.168.1.2
 
-router  IN      A       192.168.10.1 # Routeur par défaut interne (facultatif)
-www     IN      CNAME   router      # Alias pour www.cfitech-it.com -> router.
+ns      IN      A       192.168.1.2   ; Serveur primaire.
+ns2     IN      A       192.168.1.3   ; Serveur secondaire.
+www     IN      CNAME   ns            ; Alias vers ns.
+router  IN      A       192.168.1.1   ; Routeur local.
 ```
 
-#### Zone inverse (1.168.192.in-addr.arpa)
-
-- Créez le fichier de zone inverse :
+- Créez un fichier pour la zone inversée
 
 ```sh
-sudo cp /etc/bind/db.local /etc/bind/db.1.168.192.in-addr.arpa
-sudo nano /etc/bind/db.1.168.192.in-addr.arpa
+sudo cp /etc/bind/db.local /etc/bind/db.rev.cfitech-it.com
+sudo nano /etc/bind/db.rev.cfitech-it.com
 ```
 
-- Modifiez comme suit
+- Contenu du fichier
 
 ```sh
 $TTL    604800
-
 @       IN      SOA     ns.cfitech-it.com. admin.cfitech-it.com. (
-                        2025040200 ; Serial (à incrémenter à chaque modification)
-                        10h        ; Refresh interval
-                        15m        ; Retry interval
-                        48h        ; Expire interval
-                        604800     ; Negative Cache TTL
-)
+                        2025040200 ; Serial (à incrémenter)
+                        10h        ; Refresh
+                        15m        ; Retry
+                        48h        ; Expire
+                        604800 )   ; Negative Cache TTL
 
 @       IN      NS      ns.cfitech-it.com.
 @       IN      NS      ns2.cfitech-it.com.
 
-2       IN      PTR     ns.cfitech-it.com.
-3       IN      PTR     ns2.cfitech-it.com.
-1       IN      PTR     router.cfitech-it.com.
+2       IN PTR ns.cfitech-it.com.
+3       IN PTR ns2.cfitech-it.com.
 ```
 
-- Vérifiez la syntaxe des fichiers de zones
+- Avant de redémarrer Bind9, vérifiez les fichiers de configuration
 
 ```sh
+ # Vérifie la syntaxe générale.
+sudo named-checkconf
+
+# Vérifie la zone directe.
 sudo named-checkzone cfitech-it.com /etc/bind/db.cfitech-it.com
-sudo named-checkzone "1.168.192.in-addr.arpa" /etc/bind/db.1.168.192.in-addr.arpa
+
+# Vérifie la zone inversée.
+sudo named-checkzone 1.168.192.in-addr.arpa /etc/bind/db.rev.cfitech-it.com
 ```
 
-- Redémarrez BIND9
+- Redémarrez Bind9 après vérification
 
 ```sh
 sudo systemctl restart bind9 && sudo systemctl status bind9
 ```
 
-#### Configuration du serveur DNS secondaire
+#### Configuration du Serveur Secondaire
 
-- Sur le serveur secondaire, configurez /etc/bind/named.conf.local pour recevoir les zones du primaire
+- Ajoutez une zone esclave sur le serveur secondaire
 
 ```sh
 sudo nano /etc/bind/named.conf.local
-```
 
-- Ajoutez
-
-```sh
 zone "cfitech-it.com" {
     type slave;
-    file "/var/cache/bind/slave.db.cfitech-it.com";
-    masters { 192.168.10.2; }; # Serveur primaire DNS
+    file "/var/cache/bind/db.cfitech-it.com";
+    masters { 192.168.1.2; }; # Adresse IP du serveur primaire.
 };
 
 zone "1.168.192.in-addr.arpa" {
     type slave;
-    file "/var/cache/bind/slave.db.reverse";
-    masters { 192.168.10.2; };
+    file "/var/cache/bind/db.rev";
+    masters { 192.168.1.2; };
 };
 ```
 
-- Redémarrez BIND9 sur le secondaire
+- Redémarrez Bind9 sur le serveur secondaire
 
 ```sh
 sudo systemctl restart bind9 && sudo systemctl status bind9
 ```
 
-#### Tests et Vérifications
-
-- Test de la résolution directe (DNS primaire et secondaire)
-  - Depuis un client ou un autre serveur, exécutez
+- Depuis une machine cliente ou un autre serveur, testez la résolution DNS directe
 
 ```sh
-nslookup www.cfitech-it.com 192.168.10.2 # x = IP du primaire ou secondaire.
-dig @192.168.10.2 www.cfitech-it.com       # Vérifie les détails de la résolution.
-ping www.cfitech-it.com                 # Vérifie la connectivité.
+nslookup www.cfitech-it.com 192.168.1.x   # Remplacez x par l'IP du serveur primaire ou secondaire.
 ```
 
-#### Test de la résolution inverse (DNS primaire)
+- Testez la résolution DNS inversée (PTR)
 
 ```sh
-nslookup 192.168.10.2                     # Résolution IP -> Nom.
-dig -x 192.168.10.2                      # Vérifie les détails de la résolution inverse.
+nslookup 192.x.x.x   # Remplacez par une adresse IP configurée dans votre zone inversée.
 ```
-
-#### Sécurité et Haute Disponibilité
-
-- Sécurisation avec iptables
-  - Autorisez uniquement le trafic DNS sur le port 53 depuis des sources autorisées
-
-```sh
-sudo ufw allow from any to any port 53 proto udp comment "Allow DNS UDP"
-sudo ufw allow from any to any port 53 proto tcp comment "Allow DNS TCP"
-sudo ufw enable && sudo ufw status verbose
-```
-
-#### Activer DNSSEC (DNS Security Extensions)
-
-- Ajoutez dans /etc/bind/named.conf.options pour signer vos zones DNS
-
-```sh
-dnssec-enable yes;
-dnssec-validation auto;
-```
-
-- Générez des clés DNSSEC et signez vos zones
-
-#### Surveillance et Maintenance
-
-- Utilisez des outils comme **Zabbix** ou **Prometheus** pour surveiller vos serveurs DNS en temps réel
-- Automatisez l'incrémentation du numéro de série dans vos fichiers de zone avec des scripts
-
-#### Note:
-
-- Avec cette configuration adaptée, vous obtenez une infrastructure DNS professionnelle robuste, redondante, sécurisée, et évolutive, prête à être déployée.
