@@ -234,11 +234,6 @@ $INCLUDE /etc/bind/Kcfitech-it.com.+008+13234.key
 $INCLUDE /etc/bind/Kcfitech-it.com.+008+42967.key
 ```
 
-```sh
-@       IN      A       192.168.1.2   ; Adresse IP du serveur Web.
-www     IN      CNAME   @             ; Alias pour www.cfitech-it.com.
-```
-
 - Signez la zone avec cette commande
 
 ```sh
