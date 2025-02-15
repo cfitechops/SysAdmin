@@ -8,9 +8,9 @@
 sudo apt update && sudo apt upgrade -y
 ```
 
-- Installez Bind9 et ses utilitaires 
+- Installez Bind9 et ses utilitaires
 
-```sh
+```sh 
 sudo apt install bind9 bind9utils bind9-doc -y
 ```
 

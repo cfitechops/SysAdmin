@@ -10,7 +10,7 @@ sudo apt install vsftpd -y
 - Créez une sauvegarde du fichier de configuration par défaut pour pouvoir y revenir en cas de problème
 
 ```sh
-sudo cp /etc/vsftpd.conf /etc/vsftpd.conf.original
+sudo cp /etc/vsftpd.conf /etc/vsftpd.conf.bkp
 ```
 
 - Ouvrez le fichier de configuration principal de vsftpd
@@ -47,7 +47,6 @@ cfitech
 
 ```sh
 sudo systemctl restart vsftpd
-
 sudo systemctl status vsftpd
 ```
 
@@ -60,7 +59,7 @@ sudo ufw allow 21/tcp                # Port FTP pour les commandes.
 sudo ufw allow 990/tcp               # Port FTPS (FTP sécurisé).
 sudo ufw allow 40000:50000/tcp       # Ports passifs pour les connexions FTP.
 sudo ufw status                      # Vérifier l'état du pare-feu.
-```
+``` 
 
 - Pour sécuriser les connexions FTP avec SSL/TLS, générez un certificat auto-signé avec OpenSSL
 
@@ -91,7 +90,7 @@ force_local_logins_ssl=YES         # Forcer le chiffrement des connexions.
 ssl_tlsv1=YES                      # Activer TLS v1.0.
 ssl_tlsv2=NO                       # Désactiver TLS v2.0 (obsolète).
 ssl_tlsv3=NO                       # Désactiver TLS v3.0 (obsolète).
-require_ssl_reuse=NO               # Désactiver la réutilisation des sessions SSL 
+require_ssl_reuse=NO               # Désactiver la réutilisation des sessions SSL
 ssl_ciphers=HIGH                   # Utiliser uniquement des chiffrements forts.
 ```
 

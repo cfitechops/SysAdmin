@@ -5,10 +5,10 @@ sudo -i
 apt-get update
 apt-get install isc-dhcp-server vim iptables-persistent -y
 ```
-
+ 
 #### Configuration de l'interface pour le serveur DHCP
 
-- Sauvegardez le fichier de configuration par défaut 
+- Sauvegardez le fichier de configuration par défaut
 
 ```sh
 cp /etc/default/isc-dhcp-server /etc/default/isc-dhcp-server.bkp
@@ -186,15 +186,6 @@ netplan apply && ifconfig enp0s3 down && ifconfig enp0s3 up && ifconfig
 
 ```sh
 dhcp-lease-list
-```
-
-#### Testez la connectivité côté client
-
-- Redémarrez l'interface réseau du client et vérifiez qu'une adresse IP est attribuée par le serveur DHCP
-- Testez l'accès Internet avec une commande comme
-
-```sh
-ping google.com
 ```
 
 - Surveillez les journaux côté serveur

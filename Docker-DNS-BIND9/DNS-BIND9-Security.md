@@ -8,7 +8,7 @@ docker network create --subnet=172.18.0.0/16 red-cocina
 
 - Fichier sécurisé docker-compose.yml
 
-```sh
+```sh 
 version: '3.8'
 services:
   patata-dns:

@@ -1,6 +1,6 @@
-# Bind9 avec DNSSEC et Apache2 avec SSL
+# Bind9 avec DNSSEC et Nginx avec SSL
 
-- Configuration d'un serveur DNS sécurisé avec Bind9 (DNSSEC) et d'un serveur Web sécurisé avec Apache2 (SSL)
+- Configuration d'un serveur DNS sécurisé avec Bind9 (DNSSEC) et d'un serveur Web sécurisé avec Nginx (SSL)
 
 - Mise à Jour du Système
 
@@ -175,14 +175,21 @@ $TTL    604800
 
 - Avant de redémarrer Bind9, vérifiez vos fichiers de configuration
 
+- Vérifie la syntaxe générale.
+
 ```sh
-# Vérifie la syntaxe générale.
 sudo named-checkconf
+```
 
-# Vérifie la zone directe.
+- Vérifie la zone directe.
+
+```sh
 sudo named-checkzone cfitech-it.com /etc/bind/db.cfitech-it.com
+```
 
-# Vérifie la zone inversée.
+- Vérifie la zone inversée.
+
+```sh
 sudo named-checkzone 1.168.192.in-addr.arpa /etc/bind/db.rev.cfitech-it.com
 ```
 
@@ -195,7 +202,7 @@ sudo systemctl restart bind9 && sudo systemctl status bind9
 #### Activer DNSSEC pour Sécuriser vos Zones DNS
 
 - Générer les Clés DNSSEC
-  - Générez une clé ZSK (Zone Signing Key) et une clé KSK (Key Signing Key) pour signer vos zones.
+- Générez une clé ZSK (Zone Signing Key) et une clé KSK (Key Signing Key) pour signer vos zones.
 
 ```sh
 cd /etc/bind/
@@ -239,7 +246,7 @@ sudo dnssec-signzone -A -o cfitech-it.com -t /etc/bind/db.cfitech-it.com
 ```
 
 - Cela génère un fichier signé /etc/bind/db.cfitech-it.com.signed.
-  - Modifiez /etc/bind/named.conf.local pour utiliser le fichier signé
+- Modifiez /etc/bind/named.conf.local pour utiliser le fichier signé
 
 ```sh
 zone "cfitech-it.com" {
@@ -261,83 +268,70 @@ zone "1.168.192.in-addr.arpa" {
 sudo systemctl restart bind9
 ```
 
-#### Installation d'Apache2 avec SSL
+#### Installation de Nginx avec SSL
 
-- Installez Apache2 et Activez SSL
-
+- Installez Nginx
+ 
 ```sh
-sudo apt install apache2 -y
-sudo a2enmod ssl
+sudo apt install nginx -y
 ```
 
 - Créez un certificat auto-signé pour HTTPS
 
 ```sh
 sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-    -keyout /etc/ssl/private/apache-selfsigned.key \
-    -out /etc/ssl/certs/apache-selfsigned.crt \
+    -keyout /etc/ssl/private/nginx-selfsigned.key \
+    -out /etc/ssl/certs/nginx-selfsigned.crt \
     -subj "/C=FR/ST=Paris/L=Paris/O=cfitech-it/OU=IT/CN=cfitech-it.com"
 ```
 
 #### Remarque:
 
 - **-x509** : Génère un certificat auto-signé.
-
 - **-nodes** : Ne crypte pas la clé privée.
-
 - **-days 365** : Définit la validité du certificat à 365 jours.
-
 - **-newkey rsa:2048** : Crée une nouvelle clé RSA de 2048 bits.
-
 - **-subj** : Définit les informations du certificat (remplacez par vos données).
 
 - Assurez-vous que les permissions des fichiers sont correctes
 
 ```sh
-sudo chmod 600 /etc/ssl/private/apache-selfsigned.key
-sudo chmod 644 /etc/ssl/certs/apache-selfsigned.crt
-sudo chown root:root /etc/ssl/private/apache-selfsigned.key /etc/ssl/certs/apache-selfsigned.crt
+sudo chmod 600 /etc/ssl/private/nginx-selfsigned.key
+sudo chmod 644 /etc/ssl/certs/nginx-selfsigned.crt
+sudo chown root:root /etc/ssl/private/nginx-selfsigned.key /etc/ssl/certs/nginx-selfsigned.crt
 ```
 
 - Configurez le Virtual Host pour HTTPS
-  - Créez un fichier de configuration pour votre site
+- Créez un fichier de configuration pour votre site
 
 ```sh
-sudo nano /etc/apache2/sites-available/cfitech-it.com.conf
+sudo nano /etc/nginx/sites-available/cfitech-it.com
 ```
 
 - Ajoutez la configuration suivante
 
 ```sh
-<VirtualHost *:80>
-    ServerName cfitech-it.com
+server {
+    listen 80;
+    server_name cfitech-it.com www.cfitech-it.com;
+    return 301 https://$server_name$request_uri;
+}
 
-    # Rediriger tout le trafic HTTP vers HTTPS.
-    Redirect permanent / https://cfitech-it.com/
-</VirtualHost>
+server {
+    listen 443 ssl;
+    server_name cfitech-it.com www.cfitech-it.com;
 
-<VirtualHost *:443>
-    SSLEngine on
+    ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
+    ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
 
-    SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
-    SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
+    root /var/www/cfitech-it.com;
+    index index.html index.htm;
 
-    ServerAdmin admin@cfitech-it.com
-    ServerName cfitech-it.com
-    ServerAlias www.cfitech-it.com
-
-    DocumentRoot /var/www/cfitech-it.com
-
-    ErrorLog ${APACHE_LOG_DIR}/error.log
-    CustomLog ${APACHE_LOG_DIR}/access.log combined
-
-    <Directory /var/www/cfitech-it.com>
-        Options Indexes FollowSymLinks MultiViews
-        AllowOverride All
-        Require all granted
-    </Directory>
-</VirtualHost>
-``` 
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+```
 
 - Créez le dossier racine pour votre site et ajoutez un fichier index.html de test
 
@@ -346,31 +340,29 @@ sudo mkdir -p /var/www/cfitech-it.com
 echo "<h1>Bienvenue sur cfitech-it.com</h1>" | sudo tee /var/www/cfitech-it.com/index.html > /dev/null
 ```
 
-- Activez le fichier de configuration de votre site et désactivez le site par défaut d'Apache
+- Activez le fichier de configuration de votre site et désactivez le site par défaut de Nginx
 
 ```sh
-sudo a2ensite cfitech-it.com.conf
-sudo a2dissite 000-default.conf
-
-sudo systemctl reload apache2
+sudo ln -s /etc/nginx/sites-available/cfitech-it.com /etc/nginx/sites-enabled/
+sudo rm /etc/nginx/sites-enabled/default
 ```
 
-- Avant de redémarrer Apache, testez que la configuration est correcte
+- Avant de redémarrer Nginx, testez que la configuration est correcte
 
 ```sh
-sudo apache2ctl configtest
+sudo nginx -t
 ```
 
-- Redémarrez Apache pour appliquer les modifications
+- Redémarrez Nginx pour appliquer les modifications
 
 ```sh
-sudo systemctl restart apache2
+sudo systemctl restart nginx
 ```
 
 - Ouvrez les ports HTTP (80) et HTTPS (443) dans le pare-feu
 
 ```sh
-sudo ufw allow 'Apache Full'
+sudo ufw allow 'Nginx Full'
 sudo ufw reload
 ```
 
@@ -406,8 +398,11 @@ $INCLUDE /etc/bind/Kcfitech-it.com.+008+42967.key
 
 ```sh
 sudo named-checkzone cfitech-it.com /etc/bind/db.cfitech-it.com
+```
 
-# Redémarrez Bind9.
+- Redémarrez Bind9.
+
+```sh
 sudo systemctl restart bind9
 ```
 

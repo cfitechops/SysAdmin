@@ -1,125 +1,183 @@
 # Samba
 
-#### Installer Samba et Mettre à Jour le Système
-
-- Commencez par mettre à jour le système et installer Samba
+- Mettre à jour le système et installer les paquets nécessaires
 
 ```sh
 sudo apt-get update
-sudo apt-get upgrade -y
+sudo apt-get install ssh -y
 sudo apt-get install samba -y
 ```
 
-- Vérifiez que le service Samba est actif
+- Vérifier l'état du service Samba
 
 ```sh
 sudo systemctl status smbd
 ```
 
-- Créez un répertoire pour le partage Samba, par exemple /samba/share
+- Si le service n'est pas actif, démarrez-le avec
 
 ```sh
-sudo mkdir -p /samba/share
+sudo systemctl start smbd
 ```
 
-- Attribuez les permissions nécessaires au répertoire
+- Créer un répertoire partagé sécurisé
 
 ```sh
-sudo chown -R cfitech1:sambashare /samba/share
-sudo chmod -R 0750 /samba/share
+sudo mkdir -p /samba/public
+sudo chmod -R 0750 /samba/public
+sudo chown -R nobody:sambashare /samba/public
+``` 
+
+#### Explications :
+
+- /samba/public : Répertoire partagé.
+
+- **Permissions** 0750 :
+
+  - L'utilisateur propriétaire a tous les droits (lecture, écriture, exécution).
+
+  - Le groupe a accès en lecture/exécution.
+
+  - Aucun accès pour "autres".
+
+- **Propriétaire** nobody:sambashare :
+
+  - Le propriétaire est nobody, mais seuls les membres du groupe sambashare peuvent accéder au partage.
+
+- Ajoutez ensuite votre utilisateur au groupe sambashare
+
+```sh
+# Crée un nouvel utilisateur Linux.
+sudo adduser sambauser
+
+# Adding user `sambauser' ...
+# Adding new group `sambauser' (1001) ...
+# Adding new user `sambauser' (1001) with group `sambauser' ...
+# Creating home directory `/home/sambauser' ...
+# Copying files from `/etc/skel' ...
+# Enter new UNIX password: ********
+# Retype new UNIX password: ********
+# passwd: password updated successfully
+# Changing the user information for sambauser
+# Enter the new value, or press ENTER for the default
+#     Full Name []:
+#     Room Number []:
+#     Work Phone []:
+#     Home Phone []:
+#     Other []:
+# Is the information correct? [Y/n] Y
+
+
+# Ajoute l'utilisateur au groupe 'sambashare'.
+
+sudo usermod -aG sambashare sambauser
 ```
 
-- **0750** : Le propriétaire a tous les droits (lecture, écriture, exécution), les membres du groupe ont seulement les droits de lecture et d'exécution, et les autres n'ont aucun accès.
-
-- Ouvrez le fichier de configuration de Samba
+- Ouvrez le fichier de configuration Samba pour le modifier
 
 ```sh
 sudo nano /etc/samba/smb.conf
 ```
 
-- Configuration Globale Professionnelle
-
-  - Dans la section [global], configurez les options suivantes pour renforcer la sécurité et optimiser le serveur
+- Modifiez ou ajoutez les sections suivantes
+  - Cette section configure les paramètres globaux de Samba
 
 ```sh
 [global]
-   workgroup = WORKGROUP                # Nom du groupe de travail Windows par défaut.
-   netbios name = ubuntu                # Nom du serveur sur le réseau.
-   security = user                      # Forcer l'authentification des utilisateurs.
-   server min protocol = SMB3           # Utiliser SMB3 pour plus de sécurité.
-   server signing = mandatory           # Activer la signature des paquets pour éviter les attaques MITM.
-   encrypt passwords = true             # Chiffrer les mots de passe.
-   log file = /var/log/samba/log.%m     # Activer les journaux pour déboguer.
-   max log size = 1000                  # Taille maximale des journaux.
-   map to guest = never                 # Désactiver complètement l'accès invité.
-   interfaces = 192.168.1.8/24 wlp3s0 lo  # Limiter Samba à une interface réseau spécifique.
-   bind interfaces only = yes           # Bloquer l'accès sur d'autres interfaces non spécifiées.
+   workgroup = WORKGROUP        #Nom du groupe de travail (par défaut, "WORKGROUP").
+   netbios name = ubuntu        #Nom du serveur visible sur le réseau.
+   security = user              #Active l'authentification basée sur les utilisateurs.
+   server string = %h server (Samba, Ubuntu)
+   log file = /var/log/samba/%m.log  #Crée un fichier journal distinct pour chaque machine cliente.
+   max log size = 1000               #Limite la taille des journaux à 1 Mo par fichier.
+
+   interfaces = 127.0.0.0 enp0s3  #Limite Samba aux interfaces spécifiées (par exemple, enp0s8) pour éviter une exposition non désirée.
+   bind interfaces only = yes
 ```
 
-- Ajoutez une section pour votre partage professionnel
+- Cette section configure le partage public sécurisé.
 
 ```sh
-[share]
-   path = /samba/share           # Chemin du répertoire partagé.
-   browseable = no                      # Ne pas afficher dans les explorateurs réseau (optionnel).
-   valid users = cfitech1           # Restreindre l'accès à l'utilisateur spécifié.
-   read only = no                       # Permettre la modification des fichiers.
-   create mask = 0640                   # Permissions par défaut pour les fichiers créés.
-   directory mask = 0750                # Permissions par défaut pour les dossiers créés.
+[public]
+   #Chemin vers le répertoire partagé.
+   path = /samba/public
+   browseable = yes
+    #Désactive l'accès invité.
+   guest ok = no
+   read only = no
+   #Restreint l'accès aux membres du groupe sambashare.
+   valid users = @sambashare
+   force group = sambashare
+   create mask = 0640
+   directory mask = 0750
 ```
 
-- Enregistrez et fermez le fichier (Ctrl + O, puis Ctrl + X).
-
-- Ajoutez un utilisateur Linux (si ce n'est pas déjà fait)
-
-```sh
-sudo adduser cfitech1
-```
-
-- Ensuite, ajoutez cet utilisateur à Samba et définissez un mot de passe Samba sécurisé
-
-```sh
-sudo smbpasswd -a cfitech1
-```
-
-- Activez l'utilisateur dans Samba
-
-```shh
-sudo smbpasswd -e cfitech1
-```
-
-- Testez votre fichier de configuration pour détecter d'éventuelles erreurs
+- Avant de redémarrer le service, vérifiez que votre fichier de configuration est valide
 
 ```sh
 testparm
 ```
 
-- Si tout est correct, redémarrez le service Samba pour appliquer les modifications
+- Appliquez les modifications en redémarrant Samba
 
 ```sh
 sudo systemctl restart smbd nmbd
 ```
 
-- Pour accéder au partage depuis un autre ordinateur (Windows, macOS ou Linux), utilisez l'adresse suivante dans votre explorateur réseau ou gestionnaire de fichiers
+- Créer des utilisateurs Samba
+  - Pour un environnement professionnel, chaque utilisateur doit avoir son propre compte Samba. Voici comment créer un utilisateur et lui attribuer un mot de passe
 
 ```sh
-\\192.168.1.8\share\
+# Configurez un mot de passe Samba pour cet utilisateur
+sudo smbpasswd -a sambauser
 ```
 
-- Si vous êtes sur Linux, utilisez
+- Remplacez sambauser par le nom d'utilisateur souhaité. Cela demandera de définir un mot de passe pour cet utilisateur
+
+- Ajoutez ensuite cet utilisateur au groupe sambashare, s'il ne l'est pas déjà
 
 ```sh
-smb://192.168.1.8/share/
+sudo usermod -aG sambashare sambauser
 ```
 
-- Un écran d'authentification apparaîtra. Entrez le nom d'utilisateur (cfitech1) et le mot de passe Samba que vous avez configurés
+#### Configurer le pare-feu
 
-- Pour surveiller l'activité ou diagnostiquer des problèmes, consultez les journaux Samba
+- Pour sécuriser davantage votre serveur, configurez un pare-feu afin que seules les connexions locales soient autorisées à accéder à Samba
+
+- Autoriser uniquement les appareils du réseau local (par exemple, 192.168.1.0/24)
 
 ```sh
-sudo tail -f /var/log/samba/log.*
+sudo ufw allow from 192.168.1.0/24 to any app Samba
+```
+
+- Activez ensuite le pare-feu si ce n'est pas déjà fait
+
+```sh
+sudo ufw enable
+```
+
+- Vérifiez que les règles ont bien été appliquées
+
+```sh
+sudo ufw status verbose
+```
+
+#### Tester l'accès au partage
+
+- Depuis un autre appareil sur le même réseau, accédez au partage en utilisant son adresse IP. Par exemple, dans un explorateur de fichiers ou navigateur réseau
+
+```sh
+smb://192.168.1.x/public/
+```
+
+- Pour vérifier que tout fonctionne correctement, connectez-vous au serveur et créez un fichier dans le répertoire partagé
+
+```sh
+cd /samba/public/
+sudo touch testfile.txt
+ls -l /samba/public/
 ```
 
 #### Note:
 
-- Avec cette configuration, votre serveur Samba est sécurisé et prêt à être utilisé.
+- Avec cette configuration, votre serveur Samba est maintenant sécurisé et prêt pour une utilisation professionnelle.

@@ -10,9 +10,9 @@ sudo apt install -y isc-dhcp-server wireshark vim net-tools build-essential linu
 #### Configuration de l'adresse IP statique pour le serveur principal
 
 - Modifier le fichier Netplan
-
+ 
 ```sh
-nano /etc/netplan/cfg-static-ip.yaml
+sudo nano /etc/netplan/cfg-static-ip.yaml
 ```
 
 - Ajouter la configuration suivante
@@ -23,20 +23,19 @@ network:
   renderer: networkd
   ethernets:
     enp0s3:
+      dhcp4: no
       addresses:
         - 192.168.1.2/24
+      gateway4: 192.168.1.1
       nameservers:
-        addresses: [8.8.8.8, 8.8.4.4]
-      routes:
-        - to: default
-          via: 192.168.1.1
+        addresses: [8.8.8.8, 1.1.1.1]
 ```
 
 - Appliquer la configuration
 
 ```sh
-chmod 600 /etc/netplan/cfg-static-ip.yaml
-netplan apply
+sudo chmod 600 /etc/netplan/cfg-static-ip.yaml
+sudo netplan apply
 ip a
 ```
 
@@ -57,7 +56,7 @@ INTERFACESv4="enp0s3"
 - Modifier le fichier /etc/dhcp/dhcpd.conf
 
 ```sh
-gedit /etc/dhcp/dhcpd.conf
+sudo gedit /etc/dhcp/dhcpd.conf
 ```
 
 - Ajouter la configuration suivante
@@ -94,9 +93,9 @@ subnet 192.168.1.0 netmask 255.255.255.0 {
 - Tester et redémarrer le service DHCP
 
 ```sh
-dhcpd -t
-service isc-dhcp-server restart
-service isc-dhcp-server status
+sudo dhcpd -t
+sudo service isc-dhcp-server restart
+sudo service isc-dhcp-server status
 ```
 
 #### Cloner le serveur principal pour créer un serveur secondaire
@@ -104,7 +103,7 @@ service isc-dhcp-server status
 - Modifier l'adresse IP statique dans /etc/netplan/cfg-static-ip.yaml
 
 ```sh
-nano /etc/netplan/cfg-static-ip.yaml
+sudo nano /etc/netplan/cfg-static-ip.yaml
 ```
 
 - Ajouter la configuration suivante
@@ -126,7 +125,7 @@ network:
 - Appliquer la configuration Netplan
 
 ```sh
-netplan apply
+sudo netplan apply
 ```
 
 #### Configuration du basculement DHCP sur le serveur secondaire
@@ -171,7 +170,7 @@ subnet 192.168.1.0 netmask 255.255.255.0 {
 - Redémarrez le service DHCP sur le serveur secondaire
 
 ```sh
-service isc-dhcp-server restart
+sudo service isc-dhcp-server restart
 ```
 
 - Vérifiez l'état du service pour vous assurer qu'il fonctionne correctement

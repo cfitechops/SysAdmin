@@ -148,7 +148,7 @@ nano ~/dns-config/docker-compose.yml
 
 - Contenu du fichier
 
-```sh
+```sh 
 version: '3'
 services:
   patata-dns:
