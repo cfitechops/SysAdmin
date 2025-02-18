@@ -46,9 +46,9 @@ sudo mysql -u root -p
 ```
 
 ```sh
-CREATE DATABASE test_db;
-CREATE USER 'test_user'@'localhost' IDENTIFIED BY 'infotech63@';
-GRANT ALL PRIVILEGES ON test_db.* TO 'test_user'@'localhost';
+CREATE DATABASE cfitech_db;
+CREATE USER 'cfitech_user'@'localhost' IDENTIFIED BY 'infotech63@';
+GRANT ALL PRIVILEGES ON cfitech_db.* TO 'cfitech_user'@'localhost';
 FLUSH PRIVILEGES;
 EXIT;
 ```
@@ -66,9 +66,9 @@ sudo nano /var/www/html/db_test.php
 ```sh
 <?php
 $servername = "localhost";
-$username = "test_user";
+$username = "cfitech_user";
 $password = "infotech63@";
-$dbname = "test_db";
+$dbname = "cfitech_db";
 
 // Création de la connexion
 $conn = new mysqli($servername, $username, $password, $dbname);
