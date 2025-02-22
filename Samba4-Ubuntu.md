@@ -28,8 +28,8 @@ sudo nano /etc/hosts
 ```
 
 ```sh
-192.168.1.8 cfitech.local cfitech
-192.168.1.8 dc.cfitech.local dc
+192.168.1.2 cfitech.local cfitech
+192.168.1.2 dc.cfitech.local dc
 ```
 
 #### Tester la connexion vers le serveur AD.

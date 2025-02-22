@@ -15,8 +15,8 @@ sudo nano /etc/hosts
 ```
 
 ```sh
-192.168.1.8 dc.cfitech.local dc
-192.168.1.8 cfitech.local cfitech
+192.168.1.2 dc.cfitech.local dc
+192.168.1.2 cfitech.local cfitech
 ```
 
 #### Vérifier le FQDN
@@ -50,7 +50,7 @@ sudo nano /etc/resolv.conf
 ```
 
 ```sh
-nameserver 192.168.1.8
+nameserver 192.168.1.2
 nameserver 8.8.8.8
 search cfitech.local
 ```
@@ -157,7 +157,7 @@ sudo nano /etc/chrony/chrony.conf
 ```
 
 ```sh
-bindcmdaddress 192.168.1.8
+bindcmdaddress 192.168.1.2
 allow 192.168.1.0/24
 ntpsigndsocket /var/lib/samba/ntp_signd
 ```
@@ -185,7 +185,7 @@ sudo nano /etc/chrony/chrony.conf
 ```
 
 ```sh
-bindcmdaddress 192.168.1.8
+bindcmdaddress 192.168.1.2
 allow 192.168.1.0/24
 ntpsigndsocket /var/lib/samba/ntp_signd
 ```
