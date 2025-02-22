@@ -26,7 +26,7 @@ sudo systemctl start smbd
 sudo mkdir -p /samba/public
 sudo chmod -R 0750 /samba/public
 sudo chown -R nobody:sambashare /samba/public
-``` 
+```
 
 #### Explications :
 
