@@ -4,9 +4,9 @@
 
 ```sh
 sudo apt update && sudo apt upgrade -y
-```
+```     
 
-- Installation des paquets LAMP
+- Installation des paquets LAMP 
 
 ```sh
 sudo apt install apache2 php libapache2-mod-php mysql-server php-mysql -y

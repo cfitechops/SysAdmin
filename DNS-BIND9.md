@@ -7,7 +7,7 @@
 ```sh
 sudo apt update && sudo apt upgrade -y
 ```
-
+ 
 - Installez Bind9 et ses utilitaires
 
 ```sh 
