@@ -113,7 +113,7 @@ sudo systemctl restart apache2
 sudo systemctl status apache2
 ```
 
-#### Installation de Symfony
+#### Installation de Symfony 
 
 - Installation de Composer
 
