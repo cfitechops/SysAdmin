@@ -1,3 +1,10 @@
+# Pour executer et accéder à MySQL
+
+```sh
+docker-compose up -d --build
+docker exec -it symfony-project-mysql mysql -u root -p
+```
+
 # Créez le projet Symfony via Docker
 
 ```sh
@@ -31,9 +38,3 @@ docker-compose exec -w /var/www/html php-apache php bin/console doctrine:databas
 docker-compose exec -w /var/www/html php-apache php bin/console doctrine:migrations:migrate
 ```
 
-# Pour accéder à MySQL
-
-```sh
-docker-compose up -d --build
-docker exec -it symfony-project-mysql mysql -u root -p
-```
