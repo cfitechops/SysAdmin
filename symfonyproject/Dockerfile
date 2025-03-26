@@ -1,4 +1,4 @@
-# Utilise l'image officielle PHP 8.2 avec Apache
+# L'image officielle PHP 8.2 avec Apache
 FROM php:8.2-apache
 
 # Définit le répertoire racine d'Apache pour Symfony
