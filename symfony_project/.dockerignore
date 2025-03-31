@@ -4,3 +4,5 @@ docker-compose.override.yml
 var/
 vendor/
 node_modules/
+docker-compose.yml
+Dockerfile
