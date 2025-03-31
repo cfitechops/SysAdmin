@@ -10,6 +10,8 @@ services:
     environment:
       - APP_ENV=dev
       - INSTALL_SYMFONY=${INSTALL_SYMFONY:-true}
+    networks:
+      - symfony_network
     depends_on:
       db:
         condition: service_healthy
@@ -21,9 +23,11 @@ services:
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_ROOT_HOST: '%'
+      MYSQL_ROOT_HOST: "%"
     volumes:
       - db_data:/var/lib/mysql
+    networks:
+      - symfony_network
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-u${DB_USER}", "-p${DB_PASSWORD}"]
       interval: 5s
@@ -32,3 +36,8 @@ services:
 
 volumes:
   db_data:
+
+networks:
+  symfony_network:
+    driver: bridge
+    attachable: true
