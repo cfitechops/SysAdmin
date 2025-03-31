@@ -6,7 +6,6 @@ docker-compose build
 docker-compose run --rm app composer create-project symfony/skeleton:"6.4.*" symfonyapp --no-interaction
 docker-compose run --rm --workdir=/var/www/html app composer require symfony/webapp-pack --no-interaction
 docker-compose run --rm app chown -R www-data:www-data /var/www/html
-docker-compose up -d
 ```
 
 ```sh
