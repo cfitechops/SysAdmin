@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# Installation Symfony si nécessaire
+# Installation Symfony 
 if [ "${INSTALL_SYMFONY}" = "true" ] && [ ! -f composer.json ]; then
     echo "Installing Symfony..."
     composer create-project symfony/skeleton . && \
