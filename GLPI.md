@@ -230,16 +230,10 @@ nano /etc/apache2/sites-available/000-default.conf
 ```sh
 <VirtualHost *:80>
     DocumentRoot /var/www/html/glpi
-    ServerName votredomaine.com
-
     <Directory /var/www/html/glpi>
-        Options FollowSymlinks
         AllowOverride All
         Require all granted
     </Directory>
-
-    ErrorLog ${APACHE_LOG_DIR}/glpi_error.log
-    CustomLog ${APACHE_LOG_DIR}/glpi_access.log combined
 </VirtualHost>
 ```
 
@@ -333,3 +327,5 @@ systemctl restart apache2
   - Mot de passe : `glpi`
 
 ![GLPI](/assets/glpi.png)
+
+
