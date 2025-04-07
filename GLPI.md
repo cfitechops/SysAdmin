@@ -7,14 +7,14 @@
 ```sh
 sudo -i
 
-apt update
-apt -y dist-upgrade
+apt update && apt -y dist-upgrade
 ```
 
 - Installation et configuration de SSH, pour sécuriser l’accès distant
 
 ```sh
 apt -y install openssh-server
+
 nano /etc/ssh/sshd_config
 ```
 
@@ -182,7 +182,7 @@ ls /var/www/html/
 nano /etc/apache2/sites-available/000-default.conf
 ```
 
-- Remplacer par
+- Contenu
 
 ```sh
 <VirtualHost *:80>
@@ -227,11 +227,6 @@ SELINUX=Enforcing
 
 ```sh
 sudo apt install php8.2-ldap php8.2-imap php8.2-xmlrpc
-```
-
-- Redémarrer Apache
-
-```sh
 systemctl restart apache2
 ```
 
