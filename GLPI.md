@@ -1,7 +1,5 @@
 # GLPI (Gestionnaire Libre de Parc Informatique)
 
-## GLPI
-
 - GLPI est un outil open-source de gestion des actifs informatiques (IT Service Management) qui permet de gérer les tickets, les inventaires matériels/logiciels, et bien plus encore.
 
 - Gestion des Actifs Informatiques (ITAM)
@@ -34,16 +32,18 @@
 
 ## Pourquoi utiliser GLPI ?
 
-🔹 Gratuit (contrairement à ServiceNow, BMC Remedy, etc.)
-🔹 Personnalisable (plugins, thèmes, workflows)
-🔹 Communauté active (mises à jour fréquentes)
-🔹 Multi-utilisateurs (rôles et permissions avancés)
+- Gratuit (contrairement à ServiceNow, BMC Remedy, etc.)
+- Personnalisable (plugins, thèmes, workflows)
+- Communauté active (mises à jour fréquentes)
+- Multi-utilisateurs (rôles et permissions avancés)
 
 ## Cas d'Usage
 
 - `Helpdesk` : Un employé ouvre un ticket pour un problème de réseau → GLPI le route vers l’équipe support.
 - `Inventaire` : Scan automatique des nouveaux PC avec FusionInventory.
 - `Licences` : Alerte quand une licence Microsoft est sur le point d’expirer
+
+## Installation & Configuration
 
 - Avant toute installation, il est essentiel de mettre à jour les paquets
 
