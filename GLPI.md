@@ -288,3 +288,5 @@ systemctl restart apache2
   - L’interface est disponible à l’adresse `http://<IP_SERVER>`
   - Identifiant par défaut : `glpi`
   - Mot de passe : `glpi`
+
+![GLPI](/assets/glpi.png)
