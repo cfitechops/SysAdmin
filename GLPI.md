@@ -155,7 +155,7 @@ mysql -u root
 ```sh
 show databases;
 create database glpi;
-create user 'admin'@localhost identified by 'passer';
+create user 'admin'@localhost identified by 'cfitech';
 grant all privileges on glpi.* to admin@localhost;
 flush privileges;
 exit
@@ -244,7 +244,7 @@ systemctl restart apache2
 ```sh
 Serveur : localhost
 Utilisateur : admin
-Mot de passe : passer
+Mot de passe : cfitech
 Base de données : glpi
 ```
 
