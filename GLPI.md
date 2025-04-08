@@ -404,7 +404,7 @@ systemctl restart cron
   - Configurer `C:\Program Files\FusionInventory-Agent\agent.cfg` avec :
 
 ```sh
-server = http://<IP_SERVER>/plugins/fusioninventory/front/plugin_fusioninventory.communication.php
+Mode servers = http://<IP_SERVER>/plugins/fusioninventory/front/plugin_fusioninventory.communication.php
 ```
 
 - Redémarrer le service
