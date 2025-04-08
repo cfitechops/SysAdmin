@@ -57,7 +57,7 @@
 - Avant toute installation, il est essentiel de mettre à jour les paquets
 
 ```sh
-sudo -i
+sudo -i 
 
 apt update && apt -y dist-upgrade
 ```
@@ -220,7 +220,7 @@ systemctl restart mariadb
 ```
 
 - Téléchargement et extraction de GLPI
-  - Depuis : [https://glpi-project.org/downloads/](https://glpi-project.org/downloads/)
+  - Depuis : [https://github.com/glpi-project/glpi/releases?page=2](https://github.com/glpi-project/glpi/releases?page=2)
 
 ```sh
 wget https://github.com/glpi-project/glpi/releases/download/10.0.6/glpi-10.0.6.tgz
