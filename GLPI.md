@@ -53,7 +53,7 @@ sudo -i
 apt update && apt -y dist-upgrade
 ```
 
-- Installation et configuration de SSH, pour sécuriser l’accès distant
+- Installation et configuration de SSH, pour sécuriser l'accès distant
 
 ```sh
 apt -y install openssh-server
@@ -214,8 +214,8 @@ systemctl restart mariadb
   - Depuis : [https://glpi-project.org/downloads/](https://glpi-project.org/downloads/)
 
 ```sh
-wget https://github.com/glpi-project/glpi/releases/download/10.0.18/glpi-10.0.18.tgz
-tar -xvf glpi-10.0.18.tgz -C /var/www/html/
+wget https://github.com/glpi-project/glpi/releases/download/10.0.6/glpi-10.0.6.tgz
+tar -xzf glpi-10.0.6.tgz -C /var/www/html/
 ls /var/www/html/
 ```
 
@@ -230,10 +230,6 @@ nano /etc/apache2/sites-available/000-default.conf
 ```sh
 <VirtualHost *:80>
     DocumentRoot /var/www/html/glpi
-    <Directory /var/www/html/glpi>
-        AllowOverride All
-        Require all granted
-    </Directory>
 </VirtualHost>
 ```
 
@@ -247,7 +243,7 @@ ls -l /var/www/html
 - Installation et activation de SELinux
 
 ```sh
-sudo apt install selinux-basics selinux-policy-default auditd
+sudo apt install selinux-basics selinux-policy-default auditd -y
 
 sudo selinux-activate
 
@@ -263,7 +259,7 @@ SELINUX=Enforcing
 - Installation de modules PHP supplémentaires
 
 ```sh
-sudo apt install php8.2-ldap php8.2-imap php8.2-xmlrpc
+sudo apt install php8.2-ldap php8.2-imap php8.2-xmlrpc -y
 systemctl restart apache2
 ```
 
@@ -328,4 +324,137 @@ systemctl restart apache2
 
 ![GLPI](/assets/glpi.png)
 
+- Installation du Plugin FusionInventory
 
+```sh
+# Se placer dans le dossier des plugins GLPI
+cd /var/www/html/glpi/plugins
+
+# Télécharger la dernière version du plugin
+wget https://github.com/fusioninventory/fusioninventory-for-glpi/releases/download/glpi10.0.6%2B1.1/fusioninventory-10.0.6+1.1.tar.bz2
+
+# Extraire l'archive
+tar -xjf fusioninventory-10.0.6+1.1.tar.bz2
+
+# Configurer les permissions
+chown -R www-data:www-data fusioninventory
+```
+
+- Configuration Apache
+
+```sh
+# Créer la configuration virtuelle
+nano /etc/apache2/sites-available/glpi.conf
+```
+
+- Ajoutez cette configuration
+
+```sh
+<VirtualHost *:80>
+    DocumentRoot /var/www/html/glpi
+    <Directory /var/www/html/glpi>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+```
+
+- Puis exécuter
+
+```sh
+a2ensite glpi.conf
+a2dissite 000-default.conf
+systemctl restart apache2
+```
+
+```sh
+curl -I http://localhost/plugins/fusioninventory/front/plugin_fusioninventory.communication.php
+```
+
+- Configurez le cron pour les tâches automatique (optionnel mais recommandé)
+
+```sh
+crontab -e
+```
+
+- Ajouter cette ligne
+
+```sh
+*/1 * * * * php /var/www/html/glpi/front/cron.php
+```
+
+```sh
+/etc/init.d/cron restart
+systemctl restart cron
+```
+
+- Activation dans GLPI
+  - Se connecter à GLPI (http://<votre-ip>)
+  - Aller dans Configuration > Plugins
+  - Activer FusionInventory
+  - Aller dans Configuration > Action automatique
+  - Rechercher `taskscheduler` et cliquer sur `Exécuter`
+
+#### Installation des Agents
+
+- Pour **Windows**
+  - Télécharger l'agent depuis [https://github.com/fusioninventory/fusioninventory-agent/releases/tag/2.6](https://github.com/fusioninventory/fusioninventory-agent/releases/tag/2.6)
+  - Installer l'agent
+  - Configurer `C:\Program Files\FusionInventory-Agent\agent.cfg` avec :
+
+```sh
+server = http://<IP_GLPI>/plugins/fusioninventory/front/plugin_fusioninventory.communication.php
+```
+
+- Redémarrer le service
+
+```sh
+net stop FusionInventory-Agent && net start FusionInventory-Agent
+```
+
+- Pour **Linux (Debian/Ubuntu)**
+
+```sh
+wget https://github.com/fusioninventory/fusioninventory-agent/releases/download/2.6/fusioninventory-agent_2.6-1_all.deb
+sudo apt --fix-broken install
+sudo apt install hwdata
+
+
+sudo apt install libnet-cups-perl libnet-ip-perl libwww-perl libparse-edid-perl \
+libproc-daemon-perl libuniversal-require-perl libfile-which-perl libxml-treepp-perl \
+libxml-xpath-perl libyaml-perl libtext-template-perl libhttp-daemon-perl \
+libyaml-tiny-perl libsocket-getaddrinfo-perl
+
+sudo dpkg -i fusioninventory-agent_2.6-1_all.deb
+sudo apt install -f
+```
+
+- Configuration
+
+```sh
+sudo nano /etc/fusioninventory/agent.cfg
+```
+
+- Ajouter exactement
+
+```sh
+server ="http://192.168.129.77/plugins/fusioninventory/front/plugin_fusioninventory.communication.php"
+<server url="http://192.168.129.77/plugins/fusioninventory/front/plugin_fusioninventory.communication.php"/>
+```
+
+- Puis
+
+```sh
+sudo systemctl enable fusioninventory-agent
+sudo systemctl start fusioninventory-agent
+```
+
+- Vérification dans GLPI
+
+  - Dans GLPI, aller dans `Plugins > FusionInventory > Inventaire`
+  - Les équipements devraient apparaître dans les 5-10 minutes
+
+- Pour gérer le **Marketplace**
+  - Aller dans `Configuration > General > GLPI Network`
+  - Activer/désactiver selon besoins
