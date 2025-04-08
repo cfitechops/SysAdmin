@@ -404,7 +404,7 @@ systemctl restart cron
   - Configurer `C:\Program Files\FusionInventory-Agent\agent.cfg` avec :
 
 ```sh
-server = http://<IP_GLPI>/plugins/fusioninventory/front/plugin_fusioninventory.communication.php
+server = http://<IP_SERVER>/plugins/fusioninventory/front/plugin_fusioninventory.communication.php
 ```
 
 - Redémarrer le service
@@ -439,8 +439,7 @@ sudo nano /etc/fusioninventory/agent.cfg
 - Ajouter exactement
 
 ```sh
-server ="http://192.168.129.77/plugins/fusioninventory/front/plugin_fusioninventory.communication.php"
-<server url="http://192.168.129.77/plugins/fusioninventory/front/plugin_fusioninventory.communication.php"/>
+<server url="http://<IP_SERVER>/plugins/fusioninventory/front/plugin_fusioninventory.communication.php"/>
 ```
 
 - Puis
