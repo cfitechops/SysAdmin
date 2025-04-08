@@ -391,9 +391,9 @@ systemctl restart cron
 
 - Activation dans GLPI
   - Se connecter à GLPI (http://<votre-ip>)
-  - Aller dans Configuration > Plugins
-  - Activer FusionInventory
-  - Aller dans Configuration > Action automatique
+  - Aller dans `Configuration > Plugins`
+  - Activer `FusionInventory`
+  - Aller dans `Configuration > Action automatique`
   - Rechercher `taskscheduler` et cliquer sur `Exécuter`
 
 #### Installation des Agents
