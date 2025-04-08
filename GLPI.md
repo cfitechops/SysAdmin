@@ -4,31 +4,32 @@
 
 - Gestion des Actifs Informatiques (ITAM)
 
-  - Inventaire matériel (PC, serveurs, imprimantes, etc.)
-  - Inventaire logiciel (licences, versions installées)
-  - Suivi des configurations (CMDB)
+  - Inventaire automatique (PC, serveurs, imprimantes) via FusionInventory
+  - Gestion des licences logicielles (alertes d'expiration, conformité)
+  - CMDB (Base de données de configuration) pour tracer les dépendances entre équipements
 
 - Gestion des Tickets (Helpdesk)
 
-  - Création et suivi des `incidents` et `demandes`
-  - Attribution aux techniciens
-  - Historique des résolutions
+  - Création de tickets `incidents/demandes` avec catégorisation
+  - Attribution aux techniciens selon les compétences
+  - Tableaux de bord pour suivre les temps de résolution
 
 - Gestion des Projets et Tâches
 
-  - Planification des interventions
-  - Suivi des délais et priorités
+  - Planification d’interventions `gestion des délais/priorités`
+  - Suivi des tâches avec notifications
 
 - Automatisation (via plugins)
 
   - Intégration avec FusionInventory (découverte automatique des équipements)
-  - Connexion à LDAP/Active Directory (authentification centralisée)
-  - Génération de rapports
+  - Intégration `LDAP/AD` pour l’authentification centralisée
+  - Rapports automatisés (PDF, CSV)
+  - Synchronisation avec les outils de monitoring `Nagios, Zabbix`
 
-- Conformité et Sécurité
+- Conformité & Sécurité
   - Gestion des licences logicielles
   - Audit des configurations
-  - Suivi des vulnérabilités
+  - Détection de vulnérabilités (via plugins)
 
 ## Pourquoi utiliser GLPI ?
 
@@ -37,11 +38,19 @@
 - Communauté active (mises à jour fréquentes)
 - Multi-utilisateurs (rôles et permissions avancés)
 
-## Cas d'Usage
+## Cas Concrets d'Utilisation
 
-- `Helpdesk` : Un employé ouvre un ticket pour un problème de réseau → GLPI le route vers l’équipe support.
-- `Inventaire` : Scan automatique des nouveaux PC avec FusionInventory.
-- `Licences` : Alerte quand une licence Microsoft est sur le point d’expirer
+- **Helpdesk**
+  - `Scénario` : Un employé ouvre un ticket pour "réseau lent" → Le ticket est routé vers l’équipe réseau avec SLA de 2h.
+  - `Bénéfice` : Réduction de 40% du temps de résolution (historique des solutions passées).
+- **Inventaire**
+
+  - `Scénario` : Scan automatique des nouveaux PC branchés sur le réseau → Alerte si logiciel non autorisé détecté.
+  - `Bénéfice` : Inventaire temps réel sans intervention manuelle.
+
+- **Licences**
+  - `Scénario` : Alerte automatique 30 jours avant l’expiration des licences Microsoft.
+  - `Bénéfice` : Évite les amendes pour non-conformité.
 
 ## Installation & Configuration
 
