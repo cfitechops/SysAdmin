@@ -292,22 +292,6 @@ Base de données : glpi
 rm -fr /var/www/html/glpi/install/install.php
 ```
 
-- Ouvrir le fichier SafeDocumentRoot.php
-
-```sh
-nano /var/www/html/glpi/src/System/Requirement/SafeDocumentRoot.php
-```
-
-- Recherchez la structure conditionnelle `else` qui valide le `DocumentRoot`.
-- Modifier le code comme suit
-
-```sh
-else {
-    $this->validated = false;
-    return; // Ajout de cette ligne pour éviter les erreurs inutiles
-}
-```
-
 - Modifier `php.ini` pour renforcer la sécurité
 
 ```sh
