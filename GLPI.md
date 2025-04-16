@@ -52,7 +52,7 @@
   - `Scénario` : Alerte automatique 30 jours avant l’expiration des licences Microsoft.
   - `Bénéfice` : Évite les amendes pour non-conformité.
 
-#### Scénario quotidien avec GLPI
+## Scénario quotidien avec GLPI
 
 - **Un employé a un problème avec son imprimante.**
   - Il se connecte au portail GLPI et crée un ticket d’incident.
