@@ -67,7 +67,7 @@
 - **L’entreprise analyse les rapports.**
   - Elle remarque que certaines imprimantes tombent souvent en panne → décision d’achat de nouveau matériel.
 
-#### Schéma simplifié du fonctionnement de GLPI
+## Schéma simplifié du fonctionnement de GLPI
 
 ```sh
 Utilisateurs                       Technicien IT                  Admin / Manager
