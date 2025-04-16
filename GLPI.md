@@ -52,6 +52,21 @@
   - `Scénario` : Alerte automatique 30 jours avant l’expiration des licences Microsoft.
   - `Bénéfice` : Évite les amendes pour non-conformité.
 
+#### Scénario quotidien avec GLPI
+
+- **Un employé a un problème avec son imprimante.**
+  - Il se connecte au portail GLPI et crée un ticket d’incident.
+- **Le technicien reçoit une notification.**
+  - Il voit le ticket, l’attribue à lui-même et planifie une intervention.
+- **Il consulte l’équipement concerné dans GLPI.**
+  - Il voit l’historique : date d’achat, dernier entretien, garantie, etc.
+- **Il résout le problème et clôture le ticket.**
+  - L’utilisateur est notifié automatiquement.
+- **L’intervention est archivée automatiquement.**
+  - Cela permet de suivre les performances, les équipements problématiques, etc.
+- **L’entreprise analyse les rapports.**
+  - Elle remarque que certaines imprimantes tombent souvent en panne → décision d’achat de nouveau matériel.
+
 #### Schéma simplifié du fonctionnement de GLPI
 
 ```sh
@@ -69,7 +84,7 @@ Matériel lié aux tickets  ◄────  Gestion du parc  ◄────  C
 - Avant toute installation, il est essentiel de mettre à jour les paquets
 
 ```sh
-sudo -i 
+sudo -i
 
 apt update && apt -y dist-upgrade
 ```
