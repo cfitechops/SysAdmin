@@ -52,6 +52,18 @@
   - `Scénario` : Alerte automatique 30 jours avant l’expiration des licences Microsoft.
   - `Bénéfice` : Évite les amendes pour non-conformité.
 
+#### Schéma simplifié du fonctionnement de GLPI
+
+```sh
+Utilisateurs                       Technicien IT                  Admin / Manager
+     │                                  │                                │
+     ▼                                  ▼                                ▼
+Création de tickets  ─────►  Attribution / Résolution  ─────►  Suivi / Reporting
+     │                                  │                                │
+     ▼                                  ▼                                ▼
+Matériel lié aux tickets  ◄────  Gestion du parc  ◄────  Contrats, coûts, licences
+```
+
 ## Installation & Configuration
 
 - Avant toute installation, il est essentiel de mettre à jour les paquets
