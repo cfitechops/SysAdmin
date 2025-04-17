@@ -149,13 +149,13 @@ gshadow        files
 hosts          files dns
 ```
 
-#### Reinicar servicio winbind
+#### Redémarrer le service Winbind
 
 ```sh
 sudo systemctl restart winbnd
 ```
 
-#### Listar usuarios y grupos del dominio.
+#### Répertorier les utilisateurs et les groupes du domaine.
 
 ```sh
 wbinfo -u
