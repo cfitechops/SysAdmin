@@ -1,9 +1,0 @@
-.git/
-.env
-var/
-vendor/
-node_modules/
-docker-compose.test.yml
-docker-compose.dev.yml
-docker-compose.yml
-Dockerfile
