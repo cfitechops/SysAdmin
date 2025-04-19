@@ -17,19 +17,19 @@
 
 #### Étape 1 : Installer les packages PHP et MySQL
 
-- 1. Mettre à jour et mettre à niveau les packages Ubuntu
+- 1 - Mettre à jour et mettre à niveau les packages Ubuntu
 
 ```sh
 apt update && apt upgrade
 ```
 
-- 2. installer Apache et MySQL Server
+- 2 - installer Apache et MySQL Server
 
 ```sh
 apt install apache2 mariadb-server
 ```
 
-- 3. Installez PHP et les autres dépendances et redémarrez Apache
+- 3 - Installez PHP et les autres dépendances et redémarrez Apache
 
 ```sh
 apt install libapache2-mod-php php-bz2 php-gd php-mysql php-curl \
@@ -37,7 +37,7 @@ php-mbstring php-imagick php-zip php-ctype php-curl php-dom \
 php-json php-posix php-bcmath php-xml php-intl php-gmp zip unzip wget
 ```
 
-- 4. Activez les modules Apache requis et redémarrez Apache
+- 4 - Activez les modules Apache requis et redémarrez Apache
 
 ```sh
 a2enmod rewrite dir mime env headers
@@ -46,13 +46,13 @@ systemctl restart apache2
 
 #### Étape 2 : Configurer le serveur MySQL
 
-- 1. Connectez-vous à l'invite MySQL, tapez simplement
+- 1 - Connectez-vous à l'invite MySQL, tapez simplement
 
 ```sh
 mysql
 ```
 
-- 2. Créez une base de données MySQL et un utilisateur pour Nextcloud et fournissez des autorisations.
+- 2 - Créez une base de données MySQL et un utilisateur pour Nextcloud et fournissez des autorisations.
 
 ```sh
 CREATE USER 'nextcloud'@'localhost' IDENTIFIED BY 'passw@rd';
@@ -66,7 +66,7 @@ quit;
 
 Téléchargez maintenant la dernière archive Nextcloud. Accédez à la [page de téléchargement Nextcloud.](https://nextcloud.com/install/).
 
-- 1. Téléchargez et décompressez le dossier racine Web (/var/www/html)
+- 1 - Téléchargez et décompressez le dossier racine Web (/var/www/html)
 
 ```sh
 cd /var/www/html
@@ -75,20 +75,20 @@ wget https://download.nextcloud.com/server/releases/latest.zip
 unzip latest.zip
 ```
 
-- 2. Déplacez tout le contenu de nextcloud vers le dossier racine Web (/var/www/html)
+- 2 - Déplacez tout le contenu de nextcloud vers le dossier racine Web (/var/www/html)
 
 ```sh
 cd /var/www/html/nextcloud
 mv * .* ../
 ```
 
-- 3. Supprimez le répertoire nextcloud vide
+- 3 - Supprimez le répertoire nextcloud vide
 
 ```sh
 rmdir /var/www/html/nextcloud
 ```
 
-- 4. Modifiez la propriété du répertoire de contenu Nextcloud en l'attribuant à l'utilisateur HTTP.
+- 4 - Modifiez la propriété du répertoire de contenu Nextcloud en l'attribuant à l'utilisateur HTTP.
 
 ```sh
 chown -R www-data:www-data /var/www/html
@@ -98,7 +98,7 @@ chown -R www-data:www-data /var/www/html
 
 - Accédez maintenant à votre navigateur et saisissez `http:// [adresse IP ou nom de domaine complet]` du serveur. La page d'installation de Nextcloud ci-dessous s'affiche. Vous devez y renseigner :
 
-- 1. le nom d'utilisateur et le mot de passe de l'administrateur Nextcloud
-- 2. les identifiants de la base de données (nom, utilisateur et mot de passe de la base de données).
+- 1 - le nom d'utilisateur et le mot de passe de l'administrateur Nextcloud
+- 2 - les identifiants de la base de données (nom, utilisateur et mot de passe de la base de données).
 
 - Après avoir fourni toutes les informations, cliquez sur le bouton Installer. Il installera Nextcloud dans une minute et fournira la page d'installation de l'application recommandée.
