@@ -10,17 +10,17 @@
 
 #### Table des matières
 
-- Étape 1 : installer les packages requis
-- Étape 2. Configurer le serveur MySQL
-- Étape 3. Téléchargez, extrayez et appliquez les autorisations.
-- Étape 4. Installer NextCloud depuis la ligne de commande
-- Étape 5. Installer et configurer PHP-FPM avec Apache
-- Étape 6. Créer une page info.php pour vérifier les fonctionnalités PHP
-- Étape 7. Activer Opcache en PHP
-- Étape 8. Activer APCu en PHP
-- Étape 9. Installer et configurer Redis
-- Étape 10. Installer SSL et activer HTTP2
-- Étape 11. URL élégantes
+- **Étape 1**. installer les packages requis
+- **Étape 2**. Configurer le serveur MySQL
+- **Étape 3**. Téléchargez, extrayez et appliquez les autorisations.
+- **Étape 4**. Installer NextCloud depuis la ligne de commande
+- **Étape 5**. Installer et configurer PHP-FPM avec Apache
+- **Étape 6**. Créer une page info.php pour vérifier les fonctionnalités PHP
+- **Étape 7**. Activer Opcache en PHP
+- **Étape 8**. Activer APCu en PHP
+- **Étape 9**. Installer et configurer Redis
+- **Étape 10**. Installer SSL et activer HTTP2
+- **Étape 11**. URL élégantes
 
 #### Étape 1 : installer les packages requis
 
