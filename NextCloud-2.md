@@ -101,6 +101,7 @@ chown -R www-data:www-data /var/www/nextcloud/
 
 ```sh
 cd /var/www/nextcloud
+
 sudo -u www-data php occ  maintenance:install --database \
 "mysql" --database-name "nextcloud"  --database-user "nextcloud" --database-pass \
 "passw@rd" --admin-user "admin" --admin-pass "admin123"
