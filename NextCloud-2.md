@@ -95,7 +95,7 @@ chown -R www-data:www-data /var/www/nextcloud/
 
 #### Étape 4. Installer NextCloud depuis la ligne de commande
 
-- Nous allons installer Nextcloud sur Ubuntu 22.04 en ligne de commande. Cela nous fera gagner du temps, car nous fournirons toutes les informations d'identification de base de données et d'administrateur nécessaires à l'installation. L'installation de Nextcloud se fera en mode silencieux, sans configuration web. Pour une installation détaillée de Nextcloud en ligne de commande, consultez cette [page.](https://github.com/cfitechops/SysAdmin/blob/main/NextCloud-0.md).
+- Nous allons installer Nextcloud sur Ubuntu 22.04 en ligne de commande. Cela nous fera gagner du temps, car nous fournirons toutes les informations d'identification de base de données et d'administrateur nécessaires à l'installation. L'installation de Nextcloud se fera en mode silencieux, sans configuration web. Pour une installation détaillée de Nextcloud en ligne de commande, consultez cette [page.](https://github.com/cfitechops/SysAdmin/blob/main/NextCloud-0.md)
 
 - 1 - Exécutez la commande CLI
 
