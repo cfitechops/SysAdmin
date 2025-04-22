@@ -1,3 +1,3 @@
-# DNS Sécurisé avec BIND9 - DNSSEC et APACHE
+# DNS Sécurisé avec BIND9 - DNSSEC & APACHE
 
 ![dns](/assets/apache.png)
