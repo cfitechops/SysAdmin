@@ -339,7 +339,7 @@ array (
 - 5 - Certains en-têtes ne sont pas définis correctement sur votre instance - L' Strict-Transport-Securityen-tête HTTP n'est pas défini (doit être au moins 15552000de secondes).
 
 ```sh
-sudo nano /etc/apache2/sites-available/nextcloud.diarabaka.com-le-ssl.conf
+sudo nano /etc/apache2/sites-available/nextcloud.diarabaka.com.conf
 ```
 
 - Ajouter après
