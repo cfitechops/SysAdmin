@@ -1,6 +1,6 @@
-# DNS BIND9 DNSSEC
+# DNS Sécurisé avec BIND9 et DNSSEC
 
-- Une infrastructure DNS sécurisée est essentielle pour garantir la disponibilité et l'intégrité des services réseau. Cette configuration complète intègre BIND9 avec DNSSEC pour :
+- Le DNS traditionnel est vulnérable aux attaques. DNSSEC (DNS Security Extensions) protège vos requêtes DNS grâce à un système de signature cryptographique.
 
   - **Haute disponibilité** : Architecture primaire/secondaire
   - **Sécurité renforcée** : Chiffrement DNSSEC et restrictions d'accès
@@ -9,15 +9,7 @@
 
 #### Topologie Globale
 
-![dns](/assets/dnssec01.png)
-
-#### Flux DNSSEC
-
-![dns](/assets/dnssec02.png)
-
-#### Hiérarchie des Clés DNSSEC
-
-![dns](/assets/dnssec03.png)
+![dns](/assets/dnsssec.png)
 
 #### Étape 1 : Préparation du système
 
