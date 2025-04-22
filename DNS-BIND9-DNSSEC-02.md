@@ -9,7 +9,9 @@
 
 - **Avantages immédiats** :
   ✓ Prévention des attaques de type "man-in-the-middle"
+
   ✓ Compatibilité avec tous les registrars
+  
   ✓ Maintenance simplifiée
 
 ![dns](/assets/dnsssec.png)
