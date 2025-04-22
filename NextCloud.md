@@ -432,7 +432,7 @@ chmod +X nextcloud_iptables.sh
 ./nextcloud_iptables.sh
 ```
 
-- 3 - Save the rules permanently. It will reload across reboot.
+- 3 - Enregistrez les règles de manière permanente. Elles seront rechargées au redémarrage.
 
 ```sh
 apt install iptables-persistent netfilter-persistent -y
@@ -441,8 +441,10 @@ systemctl enable netfilter-persistent
 systemctl start netfilter-persistent
 ```
 
-- 4 - If you Update the Rules, you have to save it, so that it can be reloaded across reboot
+- 4 - Si vous mettez à jour les règles, vous devez les enregistrer afin de pouvoir les recharger lors du redémarrage.
 
 ```sh
 iptables-save > /etc/iptables/rules.v4
 ```
+
+- **[Remarque]** : concernant le port SSH, vous devez uniquement autoriser votre nœud ou réseau spécifique à accéder à distance à votre serveur nextcloud.
