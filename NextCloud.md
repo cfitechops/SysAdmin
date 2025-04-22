@@ -102,6 +102,7 @@ sudo mariadb
 
 ```sh
 CREATE DATABASE nextcloud;
+SHOW DATABASES;
 GRANT ALL PRIVILEGES ON nextcloud.* TO 'nextcloud'@'localhost' IDENTIFIED BY 'mypassword';
 FLUSH PRIVILEGES;
 ```
@@ -320,7 +321,7 @@ array (
 'host' => 'localhost',
 'port' => 6379,
 ),
-'default_phone_region' => 'US',
+'default_phone_region' => 'EU',
 'overwriteprotocol' => 'https',
 ```
 
@@ -348,6 +349,100 @@ Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains
 sudo systemctl restart apache2
 ```
 
+## Partie 4 : Protection d'accès avec pare-feu
+
+- Aucun serveur ne peut maintenir une bonne sécurité sans une politique de pare-feu active. après avoir installé et configuré nextcloud, nous devons autoriser le trafic uniquement vers des ports spécifiques, le reste des ports doit être proche du monde. si nous ajoutons plus d'applications nextcloud plus tard, nous devrons peut-être ouvrir de nouveaux ports au pare-feu plus tard.
+
+- 1 - exécutez le code suivant pour la configuration de base du pare-feu Iptables.
+
 ```sh
-Source : https://www.learnlinux.tv/complete-walkthrough-for-installing-nextcloud-on-ubuntu-24-04/
+nano nextcloud_iptables.sh
+```
+
+```sh
+#!/bin/bash
+
+# Flush all existing rules
+iptables -F
+iptables -X
+iptables -t nat -F
+iptables -t nat -X
+iptables -t mangle -F
+iptables -t mangle -X
+
+# Allow loopback traffic
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A OUTPUT -o lo -j ACCEPT
+
+# Allow established and related incoming traffic
+iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+# Allow all outgoing traffic
+iptables -A OUTPUT -j ACCEPT
+
+# Allow incoming traffic on port 22 (SSH)
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+
+# Allow incoming traffic on port 80 (HTTP)
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+
+# Allow incoming traffic on port 443 (HTTPS)
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+
+# Allow ICMP (ping)
+iptables -A INPUT -p icmp -j ACCEPT
+
+# Apply security hardening
+
+# Protect against SYN flood attacks
+iptables -A INPUT -p tcp ! --syn -m conntrack --ctstate NEW -j DROP
+iptables -A INPUT -p tcp --tcp-flags ALL NONE -j DROP
+iptables -A INPUT -p tcp --tcp-flags SYN,FIN SYN,FIN -j DROP
+iptables -A INPUT -p tcp --tcp-flags SYN,RST SYN,RST -j DROP
+
+# Protect against ping flood (limit to 1 ping per second with burst of 3)
+iptables -A INPUT -p icmp --icmp-type echo-request -m limit --limit 1/s --limit-burst 3 -j ACCEPT
+
+# Protect against IP spoofing
+iptables -A INPUT -s 10.0.0.0/8 -j DROP
+iptables -A INPUT -s 172.16.0.0/12 -j DROP
+iptables -A INPUT -s 192.168.0.0/16 -j DROP
+iptables -A INPUT -s 127.0.0.0/8 -j DROP
+iptables -A INPUT -s 224.0.0.0/4 -j DROP
+iptables -A INPUT -s 240.0.0.0/5 -j DROP
+iptables -A INPUT -s 0.0.0.0/8 -j DROP
+iptables -A INPUT -s 169.254.0.0/16 -j DROP
+
+# Log dropped packets (optional)
+iptables -A INPUT -m limit --limit 5/min -j LOG --log-prefix "iptables denied: " --log-level 7
+
+# Drop all other inbound traffic
+iptables -A INPUT -j DROP
+
+# End of script
+```
+
+- 2 - Appliquez les règles iptables via un script, suivez les
+
+```sh
+chmod +X nextcloud_iptables.sh
+```
+
+```sh
+./nextcloud_iptables.sh
+```
+
+- 3 - Save the rules permanently. It will reload across reboot.
+
+```sh
+apt install iptables-persistent netfilter-persistent -y
+
+systemctl enable netfilter-persistent
+systemctl start netfilter-persistent
+```
+
+- 4 - If you Update the Rules, you have to save it, so that it can be reloaded across reboot
+
+```sh
+iptables-save > /etc/iptables/rules.v4
 ```
