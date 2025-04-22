@@ -15,7 +15,7 @@
 #### 1. Architecture Réseau
 
 - Les clients interrogent indifféremment le primaire ou le secondaire.
-- Le secondaire réplique les zones via des transferts AXFR/IXFR sécurisés.
+- Le secondaire réplique les zones via des transferts AXFR(Full Zone Transfer) / IXFR(Incremental Zone Transfer) sécurisés.
 - Les requêtes externes (hors zone) sont forwardées vers Google DNS.
 
 ![dns](/assets/dns1.png)
