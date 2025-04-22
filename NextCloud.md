@@ -1,26 +1,36 @@
-# Installation du serveur Ubuntu - Nextcloud
+# Nextcloud
+
+- [Nextcloud](https://nextcloud.com/) est une plateforme collaborative auto-hébergée conçue pour améliorer la productivité grâce à des services intégrés comme Fichiers, Talk, Groupware et Office. Elle offre des fonctionnalités similaires à celles de Dropbox, Office 365 ou Google Drive lorsqu'elle est utilisée avec des suites bureautiques comme Collabora Online ou OnlyOffice.
+
+- Nextcloud propose quatre produits principaux :
+
+  - [Fichiers](https://nextcloud.com/files/) : stockage et synchronisation de fichiers
+  - [Talk](https://nextcloud.com/talk/) : conférences audio/vidéo privées
+  - [Groupware](https://nextcloud.com/groupware/) : calendrier, contacts et mail
+  - [Office](https://nextcloud.com/office/) : suite bureautique en ligne
+
+- Nextcloud peut être hébergé dans le cloud ou sur site, offrant ainsi des options de déploiement flexibles. Il permet de stocker des documents sur des serveurs privés ou des centres de données de confiance, garantissant ainsi un contrôle et une sécurité accrus.
+
+- Vous trouverez ci-dessous un guide étape par étape expliquant comment installer NextCloud sur Ubuntu 24.04 LTS.
 
 ## Partie 1 : Configuration de Cloudflare
 
 - 1 - Assurez-vous que votre domaine utilise Cloudflare DNS
 
-![Nextcloud](/assets/cloudflare.png)
+  ![Nextcloud](/assets/cloudflare.png)
 
-- 2 - Cloudflare Zero Trust
+- 2 - Accédez à Cloudflare Zero Trust > Réseau > Tunnels
 
-- 3 - Accédez à Réseau > Tunnels .
+- 3 - Créez un tunnel et sélectionnez l'architecture Debian 64 bits
 
-- 4 - Créez le tunnel et sélectionnez l’architecture Debian 64 bits.
+- 4 - Copiez la commande d'installation du connecteur Cloudflared et exécutez-la sur votre serveur
 
-- 5 - Copiez le connecteur Cloudflared et installez-le sur le serveur Ubuntu 24.04
+  ![Nextcloud](/assets/cloudflare-2.png)
 
-- 6 - Configurer le nom d'hôte public
-
-![Nextcloud](/assets/cloudflare-2.png)
-
-## Partie 2 : Installation de Nextcloud sur Ubuntu Server 24.04
+## Partie 2 : Installation de Nextcloud
 
 - **Étape 1** : Configuration initiale
+
 - 1 - Installer les packages nécessaires :
 
 ```sh
@@ -48,7 +58,7 @@ sudo apt update && sudo apt upgrade -y && sudo apt clean
 sudo nano /etc/hostname
 ```
 
-- Ajouter le sous-domaine de Cloudflareex: nextcloud.diarabaka.com
+- Ajouter le sous-domaine de Cloudflareex: `nextcloud.diarabaka.com`
 
 ```sh
 sudo nano /etc/hosts
@@ -65,12 +75,6 @@ sudo reboot
 - Reconnectez-vous
 
 #### Étape 2 : Téléchargement et installation de Nextcloud
-
-- Télécharger Nextcloud :
-
-```sh
-wget https://download.nextcloud.com/server/releases/latest.zip
-```
 
 - Installer MariaDB :
 
@@ -102,12 +106,11 @@ sudo mariadb
 
 ```sh
 CREATE DATABASE nextcloud;
-SHOW DATABASES;
-GRANT ALL PRIVILEGES ON nextcloud.* TO 'nextcloud'@'localhost' IDENTIFIED BY 'mypassword';
+CREATE USER 'nextcloud'@'localhost' IDENTIFIED BY 'motdepassesécurisé';
+GRANT ALL PRIVILEGES ON nextcloud.* TO 'nextcloud'@'localhost';
 FLUSH PRIVILEGES;
+EXIT;
 ```
-
-- Sortir avec `CTRL+D`.
 
 #### Étape 3 : Configurer le serveur Web Apache
 
@@ -127,7 +130,13 @@ sudo a2enmod dir env headers mime rewrite ssl
 sudo phpenmod bcmath gmp imagick intl redis
 ```
 
-- 3 - Décompressez Nextcloud :
+- 3 - Télécharger Nextcloud :
+
+```sh
+wget https://download.nextcloud.com/server/releases/latest.zip
+```
+
+- Décompressez Nextcloud :
 
 ```sh
 unzip latest.zip
@@ -136,13 +145,13 @@ unzip latest.zip
 - 4 - Renommer nextcloud en sous-domaine
 
 ```sh
-mv nextcloud nextcloud.diarabaka.com
+sudo mv nextcloud /var/www/nextcloud.diarabaka.com
 ```
 
 - 5 - Modifier la propriété de nextcloud
 
 ```sh
-sudo chown -R www-data:www-data nextcloud.diarabaka.com
+sudo chown -R www-data:www-data /var/www/nextcloud.diarabaka.com
 ```
 
 - 6 - Déplacer nextcloud vers Apache
@@ -161,13 +170,12 @@ sudo a2dissite 000-default.conf
 
 ```sh
 <VirtualHost *:80>
-    DocumentRoot "/var/www/nextcloud.diarabaka.com"
     ServerName nextcloud.diarabaka.com
+    DocumentRoot /var/www/nextcloud.diarabaka.com
 
-    <Directory "/var/www/nextcloud.diarabaka.com/">
-        Options MultiViews FollowSymlinks
-        AllowOverride All
+    <Directory /var/www/nextcloud.diarabaka.com/>
         Require all granted
+        AllowOverride All
     </Directory>
 
     TransferLog /var/log/apache2/nextcloud.diarabaka.com_access.log
@@ -217,13 +225,13 @@ sudo nano /etc/php/8.3/apache2/php.ini
 ```sh
 memory_limit = 512M
 
-upload_max_filesize = 2 Go
+upload_max_filesize = 2G
 
 max_execution_time = 360
 
 post_max_size = 2G
 
-date.timezone = Europe/Belgium
+date.timezone = "Europe/Paris"
 
 opcache.enable = 1
 
@@ -356,98 +364,34 @@ sudo systemctl restart apache2
 
 - Aucun serveur ne peut maintenir une bonne sécurité sans une politique de pare-feu active. après avoir installé et configuré nextcloud, nous devons autoriser le trafic uniquement vers des ports spécifiques, le reste des ports doit être proche du monde. si nous ajoutons plus d'applications nextcloud plus tard, nous devrons peut-être ouvrir de nouveaux ports au pare-feu plus tard.
 
-- 1 - exécutez le code suivant pour la configuration de base du pare-feu Iptables.
+- Autoriser le trafic entrant sur le port 80 (HTTP)
 
 ```sh
-nano nextcloud_iptables.sh
+sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT
 ```
 
+- Autoriser le trafic entrant sur le port 443 (HTTPS)
+
 ```sh
-#!/bin/bash
-
-# Flush all existing rules
-iptables -F
-iptables -X
-iptables -t nat -F
-iptables -t nat -X
-iptables -t mangle -F
-iptables -t mangle -X
-
-# Allow loopback traffic
-iptables -A INPUT -i lo -j ACCEPT
-iptables -A OUTPUT -o lo -j ACCEPT
-
-# Allow established and related incoming traffic
-iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-
-# Allow all outgoing traffic
-iptables -A OUTPUT -j ACCEPT
-
-# Allow incoming traffic on port 22 (SSH)
-iptables -A INPUT -p tcp --dport 22 -j ACCEPT
-
-# Allow incoming traffic on port 80 (HTTP)
-iptables -A INPUT -p tcp --dport 80 -j ACCEPT
-
-# Allow incoming traffic on port 443 (HTTPS)
-iptables -A INPUT -p tcp --dport 443 -j ACCEPT
-
-# Allow ICMP (ping)
-iptables -A INPUT -p icmp -j ACCEPT
-
-# Apply security hardening
-
-# Protect against SYN flood attacks
-iptables -A INPUT -p tcp ! --syn -m conntrack --ctstate NEW -j DROP
-iptables -A INPUT -p tcp --tcp-flags ALL NONE -j DROP
-iptables -A INPUT -p tcp --tcp-flags SYN,FIN SYN,FIN -j DROP
-iptables -A INPUT -p tcp --tcp-flags SYN,RST SYN,RST -j DROP
-
-# Protect against ping flood (limit to 1 ping per second with burst of 3)
-iptables -A INPUT -p icmp --icmp-type echo-request -m limit --limit 1/s --limit-burst 3 -j ACCEPT
-
-# Protect against IP spoofing
-iptables -A INPUT -s 10.0.0.0/8 -j DROP
-iptables -A INPUT -s 172.16.0.0/12 -j DROP
-iptables -A INPUT -s 192.168.0.0/16 -j DROP
-iptables -A INPUT -s 127.0.0.0/8 -j DROP
-iptables -A INPUT -s 224.0.0.0/4 -j DROP
-iptables -A INPUT -s 240.0.0.0/5 -j DROP
-iptables -A INPUT -s 0.0.0.0/8 -j DROP
-iptables -A INPUT -s 169.254.0.0/16 -j DROP
-
-# Log dropped packets (optional)
-iptables -A INPUT -m limit --limit 5/min -j LOG --log-prefix "iptables denied: " --log-level 7
-
-# Drop all other inbound traffic
-iptables -A INPUT -j DROP
-
-# End of script
+sudo iptables -A INPUT -p tcp --dport 443 -j ACCEPT
 ```
 
-- 2 - Appliquez les règles iptables via un script, suivez les
+- Autoriser le trafic entrant sur le port 22 (SSH)
 
 ```sh
-chmod +X nextcloud_iptables.sh
+sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT
 ```
 
+- Autoriser le trafic en boucle
+
 ```sh
-./nextcloud_iptables.sh
+sudo iptables -A INPUT -j DROP
 ```
 
-- 3 - Enregistrez les règles de manière permanente. Elles seront rechargées au redémarrage.
+- Enregistrez les règles de manière permanente. Elles seront rechargées au redémarrage.
 
 ```sh
-apt install iptables-persistent netfilter-persistent -y
-
-systemctl enable netfilter-persistent
-systemctl start netfilter-persistent
-```
-
-- 4 - Si vous mettez à jour les règles, vous devez les enregistrer afin de pouvoir les recharger lors du redémarrage.
-
-```sh
-iptables-save > /etc/iptables/rules.v4
+sudo netfilter-persistent save
 ```
 
 - **[Remarque]** : concernant le port SSH, vous devez uniquement autoriser votre nœud ou réseau spécifique à accéder à distance à votre serveur nextcloud.
