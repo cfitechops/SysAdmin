@@ -48,13 +48,13 @@ sudo apt update && sudo apt upgrade -y && sudo apt clean
 sudo nano /etc/hostname
 ```
 
-- Ajouter le sous-domaine de Cloudflareex: my.cfitech.cloud
+- Ajouter le sous-domaine de Cloudflareex: nextcloud.diarabaka.com
 
 ```sh
 sudo nano /etc/hosts
 ```
 
-- Ajouter une ligne `127.0.1.1 ex: venetian my.cfitech.cloud`
+- Ajouter une ligne `127.0.1.1 ex: venetian nextcloud.diarabaka.com`
 
 - 5 - Redémarrer le serveur
 
@@ -135,19 +135,19 @@ unzip latest.zip
 - 4 - Renommer nextcloud en sous-domaine
 
 ```sh
-mv nextcloud my.cfitech.cloud
+mv nextcloud nextcloud.diarabaka.com
 ```
 
 - 5 - Modifier la propriété de nextcloud
 
 ```sh
-sudo chown -R www-data:www-data my.cfitech.cloud
+sudo chown -R www-data:www-data nextcloud.diarabaka.com
 ```
 
 - 6 - Déplacer nextcloud vers Apache
 
 ```sh
-sudo mv my.cfitech.cloud /var/www
+sudo mv nextcloud.diarabaka.com /var/www
 ```
 
 - 7 - Désactiver le site Apache par défaut
@@ -160,24 +160,24 @@ sudo a2dissite 000-default.conf
 
 ```sh
 <VirtualHost *:80>
-    DocumentRoot "/var/www/my.cfitech.cloud"
-    ServerName my.cfitech.cloud
+    DocumentRoot "/var/www/nextcloud.diarabaka.com"
+    ServerName nextcloud.diarabaka.com
 
-    <Directory "/var/www/my.cfitech.cloud/">
+    <Directory "/var/www/nextcloud.diarabaka.com/">
         Options MultiViews FollowSymlinks
         AllowOverride All
         Require all granted
     </Directory>
 
-    TransferLog /var/log/apache2/my.cfitech.cloud_access.log
-    ErrorLog /var/log/apache2/my.cfitech.cloud_error.log
+    TransferLog /var/log/apache2/nextcloud.diarabaka.com_access.log
+    ErrorLog /var/log/apache2/nextcloud.diarabaka.com_error.log
 </VirtualHost>
 ```
 
 - 9 - Activer le site Nextcloud et redémarrer Apache
 
 ```sh
-sudo a2ensite my.cfitech.cloud.conf
+sudo a2ensite nextcloud.diarabaka.com.conf
 sudo systemctl restart apache2
 ```
 
@@ -253,7 +253,7 @@ sudo systemctl restart apache2
 
 #### Étape 5 : Nextcloud via un navigateur Web
 
-- 1 - Installation via le Web: `https://my.cfitech.cloud`
+- 1 - Installation via le Web: `https://nextcloud.diarabaka.com`
 - 2 - Installer les applications recommandées
 
 ## Partie 3 : Gérer les avertissements
@@ -261,7 +261,7 @@ sudo systemctl restart apache2
 - 1 - Modifier les autorisations de config.php
 
 ```sh
-sudo chmod 660 /var/www/my.cfitech.cloud/config/config.php
+sudo chmod 660 /var/www/nextcloud.diarabaka.com/config/config.php
 ```
 
 - 2 - Certains indices facultatifs manquants ont été détectés.
@@ -269,13 +269,13 @@ sudo chmod 660 /var/www/my.cfitech.cloud/config/config.php
 - Rendre occ exécutable :
 
 ```sh
-sudo chmod +x /var/www/my.cfitech.cloud/occ
+sudo chmod +x /var/www/nextcloud.diarabaka.com/occ
 ```
 
 - Ajoutez ensuite les indices manquants :
 
 ```sh
-sudo -u www-data /var/www/my.cfitech.cloud/occ db:add-missing-indices
+sudo -u www-data /var/www/nextcloud.diarabaka.com/occ db:add-missing-indices
 ```
 
 - Vérifiez si l'erreur n'est plus
@@ -283,7 +283,7 @@ sudo -u www-data /var/www/my.cfitech.cloud/occ db:add-missing-indices
 - 3 - Une ou plusieurs migrations de type MIME sont disponibles
 
 ```sh
-sudo -u www-data /var/www/my.cfitech.cloud/occ maintenance:repair --include-expensive
+sudo -u www-data /var/www/nextcloud.diarabaka.com/occ maintenance:repair --include-expensive
 ```
 
 - 4 - Les avertissements suivants
@@ -294,7 +294,7 @@ sudo -u www-data /var/www/my.cfitech.cloud/occ maintenance:repair --include-expe
   - Vous n'avez pas encore défini ou vérifié la configuration de votre serveur de messagerie.
 
 ```sh
-sudo nano /var/www/my.cfitech.cloud/config/config.php
+sudo nano /var/www/nextcloud.diarabaka.com/config/config.php
 ```
 
 - Retirer: `maintenance => false,`
@@ -327,12 +327,12 @@ array (
 - 5 - Certains en-têtes ne sont pas définis correctement sur votre instance - L' Strict-Transport-Securityen-tête HTTP n'est pas défini (doit être au moins 15552000de secondes).
 
 ```sh
-sudo nano /etc/apache2/sites-available/my.cfitech.cloud-le-ssl.conf
+sudo nano /etc/apache2/sites-available/nextcloud.diarabaka.com-le-ssl.conf
 ```
 
 - Ajouter après
 
-`Configuration SSL (effectuée par Certbot) SSLCertificateFile /etc/letsencrypt/live/my.cfitech.cloud/fullchain.pem SSLCertificateKeyFile /etc/letsencrypt/live/my.cfitech.cloud/privkey.pem`
+`Configuration SSL (effectuée par Certbot) SSLCertificateFile /etc/letsencrypt/live/nextcloud.diarabaka.com/fullchain.pem SSLCertificateKeyFile /etc/letsencrypt/live/nextcloud.diarabaka.com/privkey.pem`
 
 ```sh
 Paste
