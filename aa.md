@@ -1,4 +1,4 @@
-# DNS BIND9 DNSSEC
+# Configuration DNSSEC Complète et Sécurisée
 
 - Mise à Jour du Système
 
@@ -259,3 +259,6 @@ zone "1.168.192.in-addr.arpa" {
 dig +dnssec www.cfitech-it.com @192.168.1.2
 dig -x 192.168.1.2 +dnssec @192.168.1.2
 ```
+
+
+# ===========
