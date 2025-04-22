@@ -255,6 +255,9 @@ sudo systemctl restart apache2
 #### Étape 5 : Nextcloud via un navigateur Web
 
 - 1 - Installation via le Web: `https://nextcloud.diarabaka.com`
+
+![Nextcloud](/assets/nextcloud.png)
+
 - 2 - Installer les applications recommandées
 
 ## Partie 3 : Gérer les avertissements
