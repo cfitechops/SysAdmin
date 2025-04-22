@@ -1,2 +1,2 @@
-# CFITECH TSPCR / Administrateur(teuse) Système & Réseau
+# CFITECH TSPCR / Administrateur·rice Système et Réseau
  
