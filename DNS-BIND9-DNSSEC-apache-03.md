@@ -239,7 +239,11 @@ sudo systemctl restart bind9 && sudo systemctl status bind9
 
 ```sh
 cd /etc/bind/
+
+# Génération des clés
 sudo dnssec-keygen -a RSASHA256 -b 2048 -n ZONE cfitech-it.com
+
+# Signature de la zone
 sudo dnssec-keygen -f KSK -a RSASHA256 -b 4096 -n ZONE cfitech-it.com
 ```
 
@@ -349,13 +353,13 @@ sudo nano /etc/apache2/sites-available/cfitech-it.com.conf
 - Ajoutez la configuration suivante
 
 ```sh
+ # Redirection HTTP → HTTPS
 <VirtualHost *:80>
     ServerName cfitech-it.com
-
-    # Rediriger tout le trafic HTTP vers HTTPS.
     Redirect permanent / https://cfitech-it.com/
 </VirtualHost>
 
+# Configuration du Virtual Host HTTPS
 <VirtualHost *:443>
     SSLEngine on
 
@@ -454,4 +458,4 @@ dig +dnssec www.cfitech-it.com @192.168.1.2
 dig -x 192.168.1.2 +dnssec @192.168.1.2
 ```
 
-- Ouvrez un navigateur et accédez à `https://cfitech-it.com`
+- Ouvrez un navigateur et Accédez à `https://cfitech-it.com` (un avertissement peut apparaître avec un certificat auto-signé).
