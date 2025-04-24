@@ -19,269 +19,264 @@
 
 - Cette solution éprouvée sécurise votre infrastructure DNS efficacement, comme démontré par les 89% d'attaques bloquées (source ISC 2023).
 
-#### Étape 1 : Préparation du système
+#### Préparation du système
 
-- Mise à jour des paquets existants
+- Mise à Jour du Système
 
 ```sh
 sudo apt update && sudo apt upgrade -y
 ```
 
-- Installation des composants nécessaires
+- Installez Bind9 ainsi que ses utilitaires :
 
 ```sh
-sudo apt install bind9 bind9utils bind9-doc dnsutils -y
-
-# bind9 : Serveur DNS principal
-# bind9utils : Outils de diagnostic
+sudo apt install bind9 bind9utils bind9-doc -y
 ```
 
-- Activation du service
+- Activez le service Bind9 au démarrage
 
 ```sh
-sudo systemctl enable --now bind9
+sudo systemctl enable bind9
+sudo systemctl start bind9
 ```
 
-- Ouverture des ports DNS
+- Ouvrez le port DNS (53) dans le pare-feu
 
 ```sh
-sudo ufw allow 53/tcp && sudo ufw allow 53/udp
+sudo ufw allow 53
+sudo ufw reload
 ```
 
-#### Étape 2 : Configuration réseau
-
-- Configuration IP statique
+- Configurez une adresse IP statique pour le serveur primaire en éditant le fichier Netplan
 
 ```sh
 sudo nano /etc/netplan/01-netcfg.yaml
 ```
+
+- Ajoutez la configuration suivante (remplacez enp0s3 par le nom de votre interface réseau)
 
 ```sh
 network:
   version: 2
   renderer: networkd
   ethernets:
-    enp0s3:  # Remplacez par votre interface réseau
+    enp0s3:
       dhcp4: false
-      addresses: [192.168.1.2/24]  # IP et masque
+      addresses:
+        - 192.168.1.2/24
       routes:
         - to: default
-          via: 192.168.1.1  # Passerelle
+          via: 192.168.1.1
       nameservers:
-        addresses: [192.168.1.2, 192.168.1.3]  # DNS primaire et secondaire
+        addresses: [192.168.1.2]
 ```
 
-- Application de la configuration
+- Appliquez la configuration
 
 ```sh
 sudo netplan apply
 ```
 
-#### Étape 3 : Configuration BIND9 principale
+#### Serveur Secondaire
+
+- Répétez les étapes ci-dessus pour le serveur secondaire, en remplaçant l’adresse IP par 192.168.1.3.
+
+##### Configuration de Bind9 sur le Serveur Primaire
+
+- Modifier les Options Globales
 
 ```sh
 sudo nano /etc/bind/named.conf.options
 ```
 
+- Ajoutez ou modifiez les options suivantes pour sécuriser le serveur
+
 ```sh
 options {
     directory "/var/cache/bind";
 
-    // DNSSEC
+    forwarders {
+        8.8.8.8;
+        8.8.4.4;
+    };
+
     dnssec-validation auto;
 
-    // Sécurité
-    listen-on { 192.168.1.2; };  # IP du serveur
-    listen-on-v6 { none; };       # Désactive IPv6
-    allow-query { 192.168.1.0/24; };  # Restriction réseau
-    allow-transfer { 192.168.1.3; };   # Seul le secondaire
-    recursion no;
-    version "none";  # Cache la version
-
-    // Forwarders
-    forwarders {
-        8.8.8.8;    # DNS Google
-        8.8.4.4;    # Secondaire
-    };
-    forward only;    # N'utilise pas la racine DNS
+    listen-on { 192.168.1.2; };           # Adresse IP du serveur primaire.
+    listen-on-v6 { none; };               # Désactiver IPv6 si non utilisé.
+    allow-query { 192.168.1.0/24; };      # Limiter les requêtes au réseau local.
+    allow-recursion { 192.168.1.0/24; };  # Limiter la récursion aux clients internes.
 };
 ```
 
-#### Étape 4 : Préparation DNSSEC (Clés)
-
-- Création du répertoire sécurisé
+- Redémarrez Bind9 pour appliquer les modifications
 
 ```sh
-sudo mkdir -p /etc/bind/keys
-sudo chown bind:bind /etc/bind/keys
-sudo chmod 750 /etc/bind/keys
+sudo systemctl restart bind9
 ```
 
-- Génération des clés RSA
-
-```sh
-cd /etc/bind/keys
-sudo dnssec-keygen -a RSASHA256 -b 3072 -n ZONE cfitech-it.com  # ZSK
-sudo dnssec-keygen -f KSK -a RSASHA256 -b 4096 -n ZONE cfitech-it.com  # KSK
-```
-
-#### Étape 5 : Configuration des zones
-
-- Zone directe
-
-```sh
-sudo nano /etc/bind/db.cfitech-it.com
-```
-
-```sh
-$TTL 86400  # 1 jour
-@   IN  SOA ns.cfitech-it.com. admin.cfitech-it.com. (
-            2024042801 ; Serial (AAAAMMJJNN)
-            3600       ; Refresh (1h)
-            900        ; Retry (15min)
-            604800     ; Expire (1 semaine)
-            86400 )    ; Minimum TTL (1 jour)
-
-; Serveurs DNS
-@       IN  NS  ns.cfitech-it.com.
-@       IN  NS  ns2.cfitech-it.com.
-
-; Enregistrements
-@       IN  A   192.168.1.2
-ns      IN  A   192.168.1.2
-ns2     IN  A   192.168.1.3
-www     IN  CNAME ns
-
-; Clés DNSSEC
-$INCLUDE /etc/bind/keys/Kcfitech-it.com.+008+12345.key  # ZSK
-$INCLUDE /etc/bind/keys/Kcfitech-it.com.+008+54321.key  # KSK
-```
-
-#### Zone inverse
-
-```sh
-sudo nano /etc/bind/db.rev.cfitech-it.com
-```
-
-```sh
-$TTL 86400
-@   IN  SOA ns.cfitech-it.com. admin.cfitech-it.com. (
-            2024042801 ; Serial
-            3600       ; Refresh
-            900        ; Retry
-            604800     ; Expire
-            86400 )    ; Minimum TTL
-
-@   IN  NS  ns.cfitech-it.com.
-@   IN  NS  ns2.cfitech-it.com.
-
-; PTR Records
-2   IN  PTR ns.cfitech-it.com.
-3   IN  PTR ns2.cfitech-it.com.
-```
-
-#### Étape 6 : Signature des zones
-
-- Signature avec la clé KSK
-
-```sh
-sudo dnssec-signzone -S -o cfitech-it.com -k Kcfitech-it.com.+008+54321.key /etc/bind/db.cfitech-it.com
-```
-
-- Vérification
-
-```sh
-sudo named-checkzone cfitech-it.com /etc/bind/db.cfitech-it.com.signed
-```
-
-#### Étape 7 : Configuration finale
+- Ajouter des Zones Directes et Inversées
 
 ```sh
 sudo nano /etc/bind/named.conf.local
 ```
 
+- Ajoutez ce contenu
+
 ```sh
-// Zone Directe
 zone "cfitech-it.com" {
     type master;
-    file "/etc/bind/db.cfitech-it.com.signed";  # Fichier signé
-    allow-transfer { 192.168.1.3; };            # Transfert sécurisé
-    key-directory "/etc/bind/keys";
-    auto-dnssec maintain;                       # Gestion automatique
-    inline-signing yes;                         # Signature en temps réel
+    file "/etc/bind/db.cfitech-it.com";
+    allow-transfer { 192.168.1.3; };     # Autorise le transfert vers le serveur secondaire.
+    also-notify { 192.168.1.3; };        # Notifie le serveur secondaire des mises à jour.
 };
 
-// Zone Inverse
 zone "1.168.192.in-addr.arpa" {
     type master;
     file "/etc/bind/db.rev.cfitech-it.com";
-    allow-transfer { 192.168.1.3; };
 };
 ```
 
-#### Étape 8 : Vérifications finales
-
-- Vérification syntaxique
+- Créer un Fichier pour la Zone Directe
+  - Copiez un modèle existant et éditez-le
 
 ```sh
-sudo named-checkconf
+sudo cp /etc/bind/db.local /etc/bind/db.cfitech-it.com
+sudo nano /etc/bind/db.cfitech-it.com
 ```
 
-- Test des zones
+- Contenu du fichier
 
 ```sh
-sudo named-checkzone cfitech-it.com /etc/bind/db.cfitech-it.com.signed
+$TTL    604800
+@       IN      SOA     ns.cfitech-it.com. admin.cfitech-it.com. (
+                        2025040200 ; Serial (à incrémenter lors des modifications)
+                        10h        ; Refresh
+                        15m        ; Retry
+                        48h        ; Expire
+                        604800 )   ; Negative Cache TTL
+
+@       IN      NS      ns.cfitech-it.com.
+@       IN      NS      ns2.cfitech-it.com.
+@       IN      A       192.168.1.2
+
+ns      IN      A       192.168.1.2   ; Serveur primaire.
+ns2     IN      A       192.168.1.3   ; Serveur secondaire.
+www     IN      CNAME   ns            ; Alias vers ns.
+router  IN      A       192.168.1.1   ; Routeur local.
+```
+
+- Créer un Fichier pour la Zone Inversée
+  - Copiez un modèle existant et éditez-le
+
+```sh
+sudo cp /etc/bind/db.local /etc/bind/db.rev.cfitech-it.com
+sudo nano /etc/bind/db.rev.cfitech-it.com
+```
+
+- Contenu du fichier
+
+```sh
+$TTL    604800
+@       IN      SOA     ns.cfitech-it.com. admin.cfitech-it.com. (
+                        2025040200 ; Serial (à incrémenter)
+                        10h        ; Refresh
+                        15m        ; Retry
+                        48h        ; Expire
+                        604800 )   ; Negative Cache TTL
+
+@       IN      NS      ns.cfitech-it.com.
+@       IN      NS      ns2.cfitech-it.com.
+
+2       IN     PTR      ns.cfitech-it.com.
+3       IN     PTR      ns2.cfitech-it.com.
+```
+
+- Avant de redémarrer Bind9, vérifiez vos fichiers de configuration
+
+```sh
+# Vérifie la syntaxe générale.
+sudo named-checkconf
+
+# Vérifie la zone directe.
+sudo named-checkzone cfitech-it.com /etc/bind/db.cfitech-it.com
+
+# Vérifie la zone inversée.
 sudo named-checkzone 1.168.192.in-addr.arpa /etc/bind/db.rev.cfitech-it.com
 ```
 
-- Redémarrage sécurisé
+- Redémarrez Bind9 après vérification
 
 ```sh
-sudo systemctl restart bind9
-sudo systemctl status bind9  # Vérification du statut
+sudo systemctl restart bind9 && sudo systemctl status bind9
 ```
 
-#### Étape 9 : Tests DNSSEC
+#### Activer DNSSEC pour Sécuriser vos Zones DNS
 
-- Test de résolution DNSSEC
+- Générer les Clés DNSSEC
+  - Générez une clé ZSK (Zone Signing Key) et une clé KSK (Key Signing Key) pour signer vos zones.
 
 ```sh
-dig +dnssec @192.168.1.2 cfitech-it.com SOA
+cd /etc/bind/
+
+sudo dnssec-keygen -a RSASHA256 -b 2048 -n ZONE cfitech-it.com          # ZSK Key
+
+sudo dnssec-keygen -f KSK -a RSASHA256 -b 4096 -n ZONE cfitech-it.com   # KSK Key
 ```
 
-- Validation complète
+- Signer la Zone avec DNSSEC
+  - Ajoutez les clés publiques dans votre fichier de zone /etc/bind/db.cfitech-it.com
 
 ```sh
-delv @192.168.1.2 cfitech-it.com
+$TTL    604800
+@       IN      SOA     ns.cfitech-it.com. admin.cfitech-it.com. (
+                        2025040200 ; Serial (à incrémenter lors des modifications)
+                        10h        ; Refresh
+                        15m        ; Retry
+                        48h        ; Expire
+                        604800 )   ; Negative Cache TTL
+
+@       IN      NS      ns.cfitech-it.com.
+@       IN      NS      ns2.cfitech-it.com.
+@       IN      A       192.168.1.2
+
+ns      IN      A       192.168.1.2   ; Serveur primaire.
+ns2     IN      A       192.168.1.3   ; Serveur secondaire.
+www     IN      CNAME   ns            ; Alias vers ns.
+router  IN      A       192.168.1.1   ; Routeur local.
+
+$INCLUDE /etc/bind/Kcfitech-it.com.+008+21439.key
+$INCLUDE /etc/bind/Kcfitech-it.com.+008+56449.key
 ```
 
-- Vérification technique
+- Ensuite, signez la zone avec cette commande
 
 ```sh
-dnssec-verify -o cfitech-it.com /etc/bind/db.cfitech-it.com.signed
+sudo dnssec-signzone -A -o cfitech-it.com -t /etc/bind/db.cfitech-it.com
 ```
 
-- Journalisation
+- Cela génère un fichier signé /etc/bind/db.cfitech-it.com.signed.
+
+- Mettre à Jour la Configuration de la Zone
+  - Modifiez /etc/bind/named.conf.local pour utiliser le fichier signé
 
 ```sh
-sudo mkdir /var/log/named
-sudo chown bind:bind /var/log/named
+zone "cfitech-it.com" {
+    type master;
+    file "/etc/bind/db.cfitech-it.com.signed";
+    allow-transfer { 192.168.1.3; };  # Autorise le transfert vers le serveur secondaire.
+    also-notify { 192.168.1.3; };     # Notifie le serveur secondaire des mises à jour.
+};
+
+zone "1.168.192.in-addr.arpa" {
+    type master;
+    file "/etc/bind/db.rev.cfitech-it.com";
+};
 ```
 
-- Rotation des clés
+- Tests de Résolution DNS avec DNSSEC
 
 ```sh
-crontab -e
-```
-
-- Ajouter dans crontab
-
-```sh
-0 3 1 * * /usr/sbin/dnssec-keygen -r /dev/urandom -a RSASHA256 -b 3072 -n ZONE cfitech-it.com
-```
-
-- Monitoring
-
-```sh
-watch -n 60 'rndc status && tail -20 /var/log/syslog | grep named'
+dig +dnssec www.cfitech-it.com @192.168.1.2
+dig -x 192.168.1.2 +dnssec @192.168.1.2
 ```
