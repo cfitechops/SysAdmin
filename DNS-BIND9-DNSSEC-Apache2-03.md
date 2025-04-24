@@ -86,7 +86,7 @@ network:
   renderer: networkd
   ethernets:
     enp0s3:
-      dhcp4: false
+      dhcp4: false 
       addresses: [172.28.0.2/16]
       routes:
         - to: default
