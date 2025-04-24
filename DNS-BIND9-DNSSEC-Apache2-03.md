@@ -68,6 +68,7 @@ sudo systemctl start bind9
 - Ouvrez le port DNS (53) dans le pare-feu
 
 ```sh
+sudo ufw enable
 sudo ufw allow 53
 sudo ufw reload
 ```
