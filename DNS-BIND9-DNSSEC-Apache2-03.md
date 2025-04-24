@@ -30,8 +30,8 @@
 ```sh
 +-------------------+       +-------------------+       +-------------------+
 |   Client (PC)     |  ⇄   |   Serveur DNS     |  ⇄   |   Internet          |
-| (192.168.1.100)   |       | (Bind9 + DNSSEC) |       | (Google DNS 8.8.8.8)|
-+-------------------+       | (192.168.1.2)    |       +-------------------+
+| (172.28.0.100)   |       | (Bind9 + DNSSEC) |       | (Google DNS 8.8.8.8)|
++-------------------+       | (172.28.0.2)    |       +-------------------+
                             |                   |
                             | Serveur Web       |
                             | (Apache2 + SSL)   |
@@ -87,12 +87,12 @@ network:
   ethernets:
     enp0s3:
       dhcp4: false
-      addresses: [192.168.1.2/24]
+      addresses: [172.28.0.2/16]
       routes:
         - to: default
-          via: 192.168.1.1
+          via: 172.28.0.1
       nameservers:
-        addresses: [192.168.1.2]
+        addresses: [172.28.0.2]
 ```
 
 - Appliquez la configuration
@@ -118,10 +118,10 @@ options {
 
     dnssec-validation auto;
 
-    listen-on { 192.168.1.2; };            # Adresse IP du serveur primaire.
+    listen-on { 172.28.0.2; };            # Adresse IP du serveur primaire.
     listen-on-v6 { none; };                # Désactiver IPv6 si non utilisé.
-    allow-query { 192.168.1.0/24; };       # Limiter les requêtes au réseau local.
-    allow-recursion { 192.168.1.0/24; };   # Limiter la récursion aux clients internes.
+    allow-query { 172.28.0.0/16; };       # Limiter les requêtes au réseau local.
+    allow-recursion { 172.28.0.0/16; };   # Limiter la récursion aux clients internes.
 };
 ```
 
@@ -144,8 +144,8 @@ sudo nano /etc/bind/named.conf.local
 zone "cfitech-it.com" {
     type master;
     file "/etc/bind/db.cfitech-it.com";
-    allow-transfer { 192.168.1.3; };     # Autorise le transfert vers le serveur secondaire.
-    also-notify { 192.168.1.3; };        # Notifie le serveur secondaire des mises à jour.
+    allow-transfer { 172.28.0.3; };     # Autorise le transfert vers le serveur secondaire.
+    also-notify { 172.28.0.3; };        # Notifie le serveur secondaire des mises à jour.
 };
 
 zone "1.168.192.in-addr.arpa" {
@@ -177,12 +177,12 @@ $TTL    604800
 
 @       IN      NS      ns.cfitech-it.com.
 @       IN      NS      ns2.cfitech-it.com.
-@       IN      A       192.168.1.2
+@       IN      A       172.28.0.2
 
-ns      IN      A       192.168.1.2   ; Serveur primaire.
-ns2     IN      A       192.168.1.3   ; Serveur secondaire.
+ns      IN      A       172.28.0.2   ; Serveur primaire.
+ns2     IN      A       172.28.0.3   ; Serveur secondaire.
 www     IN      CNAME   ns            ; Alias vers ns.
-router  IN      A       192.168.1.1   ; Routeur local.
+router  IN      A       172.28.0.1   ; Routeur local.
 ```
 
 - Créer un Fichier pour la Zone Inversée
@@ -265,12 +265,12 @@ $TTL    604800
 
 @       IN      NS      ns.cfitech-it.com.
 @       IN      NS      ns2.cfitech-it.com.
-@       IN      A       192.168.1.2
+@       IN      A       172.28.0.2
 
-ns      IN      A       192.168.1.2   ; Serveur primaire.
-ns2     IN      A       192.168.1.3   ; Serveur secondaire.
+ns      IN      A       172.28.0.2   ; Serveur primaire.
+ns2     IN      A       172.28.0.3   ; Serveur secondaire.
 www     IN      CNAME   ns            ; Alias vers ns.
-router  IN      A       192.168.1.1   ; Routeur local.
+router  IN      A       172.28.0.1   ; Routeur local.
 
 $INCLUDE /etc/bind/Kcfitech-it.com.+008+13234.key
 $INCLUDE /etc/bind/Kcfitech-it.com.+008+42967.key
@@ -289,8 +289,8 @@ sudo dnssec-signzone -A -o cfitech-it.com -t /etc/bind/db.cfitech-it.com
 zone "cfitech-it.com" {
     type master;
     file "/etc/bind/db.cfitech-it.com.signed";
-    allow-transfer { 192.168.1.3; };           # Autorise le transfert vers le serveur secondaire.
-    also-notify { 192.168.1.3; };              # Notifie le serveur secondaire des mises à jour.
+    allow-transfer { 172.28.0.3; };           # Autorise le transfert vers le serveur secondaire.
+    also-notify { 172.28.0.3; };              # Notifie le serveur secondaire des mises à jour.
 };
 
 zone "1.168.192.in-addr.arpa" {
@@ -422,12 +422,12 @@ $TTL    604800
 
 @       IN      NS      ns.cfitech-it.com.
 @       IN      NS      ns2.cfitech-it.com.
-@       IN      A       192.168.1.2
+@       IN      A       172.28.0.2
 
-ns      IN      A       192.168.1.2   ; Serveur primaire.
-ns2     IN      A       192.168.1.3   ; Serveur secondaire.
+ns      IN      A       172.28.0.2   ; Serveur primaire.
+ns2     IN      A       172.28.0.3   ; Serveur secondaire.
 www     IN      CNAME   @             ; Alias pour www.cfitech-it.com.
-router  IN      A       192.168.1.1   ; Routeur local.
+router  IN      A       172.28.0.1   ; Routeur local.
 
 $INCLUDE /etc/bind/Kcfitech-it.com.+008+13234.key
 $INCLUDE /etc/bind/Kcfitech-it.com.+008+42967.key
@@ -449,13 +449,13 @@ sudo systemctl restart bind9
 - Testez la résolution DNS directe avec DNSSEC
 
 ```sh
-dig +dnssec www.cfitech-it.com @192.168.1.2
+dig +dnssec www.cfitech-it.com @172.28.0.2
 ```
 
 - Testez la résolution inversée avec DNSSEC
 
 ```sh
-dig -x 192.168.1.2 +dnssec @192.168.1.2
+dig -x 172.28.0.2 +dnssec @172.28.0.2
 ```
 
 - Ouvrez un navigateur et Accédez à `https://cfitech-it.com` (un avertissement peut apparaître avec un certificat auto-signé).
