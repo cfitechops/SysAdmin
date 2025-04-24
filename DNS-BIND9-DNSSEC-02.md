@@ -30,11 +30,10 @@ sudo apt update && sudo apt upgrade -y
 - Installation des composants nécessaires
 
 ```sh
-sudo apt install bind9 bind9utils bind9-doc dnssec-tools -y
+sudo apt install bind9 bind9utils bind9-doc dnsutils -y
 
 # bind9 : Serveur DNS principal
 # bind9utils : Outils de diagnostic
-# dnssec-tools : Pour la gestion DNSSEC
 ```
 
 - Activation du service
@@ -89,7 +88,6 @@ options {
     directory "/var/cache/bind";
 
     // DNSSEC
-    dnssec-enable yes;
     dnssec-validation auto;
 
     // Sécurité
@@ -270,7 +268,13 @@ sudo mkdir /var/log/named
 sudo chown bind:bind /var/log/named
 ```
 
-- Rotation des clés (à ajouter dans crontab)
+- Rotation des clés
+
+```sh
+crontab -e
+```
+
+- Ajouter dans crontab
 
 ```sh
 0 3 1 * * /usr/sbin/dnssec-keygen -r /dev/urandom -a RSASHA256 -b 3072 -n ZONE cfitech-it.com
