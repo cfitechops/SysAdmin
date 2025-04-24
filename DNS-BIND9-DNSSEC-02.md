@@ -4,7 +4,6 @@
 
   - **Haute disponibilité** : Architecture primaire/secondaire
   - **Sécurité renforcée** : Chiffrement DNSSEC et restrictions d'accès
-  - **Journalisation** : Suivi des activités et détection d'anomalies
   - **Maintenance simplifiée** : Gestion automatisée des clés
 
 - **Avantages immédiats** :
