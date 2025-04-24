@@ -35,8 +35,8 @@ sudo apt install bind9 bind9utils bind9-doc -y
 - Activez le service Bind9 au démarrage
 
 ```sh
-sudo systemctl enable bind9
 sudo systemctl start bind9
+sudo systemctl status bind9
 ```
 
 - Ouvrez le port DNS (53) dans le pare-feu
