@@ -268,7 +268,7 @@ zone "cfitech-it.com" {
     also-notify { 172.28.0.3; };     # Notifie le serveur secondaire des mises à jour.
 };
 
-zone "1.168.192.in-addr.arpa" {
+zone "0.28.172.in-addr.arpa" {
     type master;
     file "/etc/bind/db.rev.cfitech-it.com";
 };
