@@ -1,6 +1,6 @@
 # Configuration d'un Serveur Web Sécurisé avec Nginx
 
-- Dans le paysage numérique actuel, la **sécurité des sites web** est devenue une exigence fondamentale. Ce projet pédagogique vous guide à travers la configuration complète d'un serveur web sécurisé utilisant **Nginx**, le deuxième serveur web le plus utilisé au monde (après Apache).
+- Dans le paysage numérique actuel, la **sécurité des sites web** est devenue une exigence fondamentale. Ce projet vous guide à travers la configuration complète d'un serveur web sécurisé utilisant **Nginx**, le deuxième serveur web le plus utilisé au monde (après Apache).
 
 #### Objectifs Principaux
 
