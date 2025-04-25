@@ -178,7 +178,7 @@ sudo nano /etc/apache2/sites-available/cfitech.it.local.conf
     SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
     SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
 
-    ServerAdmin cfitech@cfitechcomputer.local
+    ServerAdmin cfitech@cfitech.local
     ServerName cfitech.it.local
     ServerAlias www.cfitech.it.local
     DocumentRoot /var/www/cfitech.it.local
