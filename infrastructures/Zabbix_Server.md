@@ -4,13 +4,13 @@
 
 ## Voici quelques avantages du serveur Zabbix comme solution de surveillance :
 
-  - **Zabbix est hautement personnalisable** : vous pouvez facilement étendre les fonctionnalités de Zabbix en écrivant des scripts et des intégrations personnalisés.
-  - **C'est une solution open source** : Zabbix est une option intéressante si le coût est un facteur important pour votre organisation. Vous pouvez la déployer et l'adapter gratuitement à vos besoins.
-  - **Zabbix est hautement évolutif** : son architecture est conçue pour les installations à grande échelle avec des milliers d'appareils à surveiller. Le déploiement de serveurs proxy renforce son évolutivité.
-  - **Développement actif et communauté** : Zabbix bénéficie d'une vaste communauté dédiée à en faire une solution de surveillance performante.
-  - **Prise en charge du clustering** : vous pouvez déployer Zabbix dans une configuration à haute disponibilité via le clustering pour garantir l'absence totale d'interruption de service.
-  - **Notifications et alertes** : Zabbix dispose d'un système d'alertes permettant de définir des déclencheurs et des actions personnalisés. Les notifications peuvent être envoyées par SMS, e-mail ou via des intégrations tierces.
-  - Parmi de nombreuses [autres fonctionnalités](https://www.zabbix.com/features)
+- **Zabbix est hautement personnalisable** : vous pouvez facilement étendre les fonctionnalités de Zabbix en écrivant des scripts et des intégrations personnalisés.
+- **C'est une solution open source** : Zabbix est une option intéressante si le coût est un facteur important pour votre organisation. Vous pouvez la déployer et l'adapter gratuitement à vos besoins.
+- **Zabbix est hautement évolutif** : son architecture est conçue pour les installations à grande échelle avec des milliers d'appareils à surveiller. Le déploiement de serveurs proxy renforce son évolutivité.
+- **Développement actif et communauté** : Zabbix bénéficie d'une vaste communauté dédiée à en faire une solution de surveillance performante.
+- **Prise en charge du clustering** : vous pouvez déployer Zabbix dans une configuration à haute disponibilité via le clustering pour garantir l'absence totale d'interruption de service.
+- **Notifications et alertes** : Zabbix dispose d'un système d'alertes permettant de définir des déclencheurs et des actions personnalisés. Les notifications peuvent être envoyées par SMS, e-mail ou via des intégrations tierces.
+- Parmi de nombreuses [autres fonctionnalités](https://www.zabbix.com/features)
 
 #### Installer le serveur Zabbix
 
@@ -104,7 +104,7 @@ sudo vim /etc/php/*/apache2/php.ini
 ```
 
 ```sh
-; http://php.net/date.timezone
+; https://php.net/date.timezone
 date.timezone = "Europe/Brussels"
 ```
 
@@ -129,7 +129,7 @@ sudo mysql -u root
 - Créer une base de données et un utilisateur pour Zabbix :
 
 ```sh
-CREATE DATABASE zabbix character set utf8 collate utf8_bin;;
+CREATE DATABASE zabbix character set utf8 collate utf8_bin;
 GRANT ALL PRIVILEGES ON zabbix.* TO zabbix@'localhost' IDENTIFIED BY 'ZabbixDBPassw0rd';
 FLUSH PRIVILEGES;
 QUIT
@@ -175,15 +175,27 @@ sudo systemctl status zabbix-server zabbix-agent
 
 - Ouvrez votre navigateur et accédez à l'interface Web Zabbix en utilisant l'URL `http://SeverIP/zabbix/` ou `http://hostname/zabbix/`
 
+![Zabbix](/assets/Zabbix_01.png)
+
 - Cliquez sur `Étape suivante` et confirmez que toutes les dépendances sont respectées. Le message `OK` devrait s'afficher.
+
+![Zabbix](/assets/Zabbix_02.png)
 
 - Définissez les détails de votre base de données comme configuré précédemment.
 
+![Zabbix](/assets/Zabbix_03.png)
+
 - Donnez un nom à votre serveur Zabbix (par exemple, le nom d'hôte). Choisissez également le thème par défaut et définissez correctement le fuseau horaire.
+
+![Zabbix](/assets/Zabbix_04.png)
 
 - Confirmez que toutes les configurations sont correctement définies, puis finalisez le processus.
 
+![Zabbix](/assets/Zabbix_05.png)
+
 - Un message de félicitations s'affiche si tout s'est déroulé comme prévu. Terminez l'installation pour vous connecter.
+
+![Zabbix](/assets/Zabbix_06.png)
 
 - Utilisez les informations d’identification par défaut suivantes pour accéder au tableau de bord d’administration de Zabbix.
 
@@ -194,15 +206,21 @@ Password: "zabbix"
 
 - Voici une capture d’écran de ce à quoi devrait ressembler le tableau de bord.
 
+![Zabbix](/assets/Zabbix_07.png)
+
 #### 6 - Définissez un mot de passe utilisateur administrateur fort.
 
-- Accédez à `Administration  >  Utilisateurs  >  Admin  >  Mot de passe  >  Modifier le mot de passe` comme ci-dessous.
+- Accédez à ` Utilisateurs  >  Admin  >  Mot de passe  >  Modifier le mot de passe` comme ci-dessous.
+
+![Zabbix](/assets/Zabbix_08.png)
 
 - Définissez un mot de passe fort pour l'utilisateur administrateur afin de mieux sécuriser votre installation Zabbix contre les attaques.
 
 #### 7 - Ajout d'agents de surveillance au serveur Zabbix
 
 - Pour ajouter un nouvel hôte cible à surveiller par Zabbix, accédez à `Configuration  >  Hôtes` , vous devriez voir l'état du serveur Zabbix local activé comme ci-dessous.
+
+![Zabbix](/assets/Zabbix_09.png)
 
 - Les graphiques et tableaux de bord des hôtes sont accessibles via Surveillance > Hôtes . Vous pouvez ajouter d'autres hôtes en leur attribuant un nom et une adresse IP. N'oubliez pas de configurer l'agent Zabbix sur le terminal.
 
