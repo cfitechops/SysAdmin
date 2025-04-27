@@ -2,7 +2,7 @@
 
 - Zabbix est une solution de surveillance largement utilisée dans les environnements Linux, Windows, Unix et les appliances réseau. Elle permet d'extraire de nombreux paramètres réseau tels que la disponibilité, les performances générales et les mesures de sécurité. Zabbix est si mature et stable qu'il est utilisé par de grandes organisations comptant des milliers d'équipements réseau, de serveurs et d'applications déployées. Le logiciel Zabbix est publié sous licence publique générale GNU, ce qui le rend libre d'utilisation, de modification et de distribution.
 
-#### Voici quelques avantages du serveur Zabbix comme solution de surveillance :
+## Voici quelques avantages du serveur Zabbix comme solution de surveillance :
 
   - **Zabbix est hautement personnalisable** : vous pouvez facilement étendre les fonctionnalités de Zabbix en écrivant des scripts et des intégrations personnalisés.
   - **C'est une solution open source** : Zabbix est une option intéressante si le coût est un facteur important pour votre organisation. Vous pouvez la déployer et l'adapter gratuitement à vos besoins.
