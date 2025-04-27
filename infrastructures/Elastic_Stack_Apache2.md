@@ -1,0 +1,276 @@
+# Envoyer les journaux Apache2 à Elastic Stack et Filebeat
+
+- Dans cet projet, nous apprenons à envoyer les journaux Apache2 à Elastic Stack et Filebeat | Comment surveiller les journaux Apache2 avec Elastic Stack et Filebeat sur Ubuntu 24.04. Elasticsearch, Kibana et Filebeat offrent une pile puissante pour la collecte, le stockage et la visualisation des journaux en temps réel. Sur un serveur web comme Apache, la surveillance des journaux est essentielle pour suivre les erreurs, les schémas de trafic et les incidents de sécurité. Ce guide explique comment configurer Elastic Stack (Elasticsearch, Kibana et Filebeat) sur Ubuntu 24.04 et configurer Filebeat pour la collecte des journaux Apache2. À la fin, vous disposerez d'un tableau de bord Kibana affichant les journaux Apache.
+
+- **Étape 1** : Configurer l'instance Ubuntu
+  - Mettez à jour la liste des packages pour vous assurer que vous disposez des dernières versions.
+
+```sh
+sudo apt update
+```
+
+- Elasticsearch nécessite Java, nous devons donc installer OpenJDK 11.
+
+```sh
+sudo apt install openjdk-11-jdk -y
+```
+
+- Après l'installation, vérifiez que Java est correctement installé en vérifiant sa version.
+
+```sh
+java -version
+```
+
+- Installez le serveur Web Apache.
+
+```sh
+sudo apt install apache2
+```
+
+- Vérifiez l’état du service Apache pour vous assurer qu’il est en cours d’exécution.
+
+```sh
+sudo systemctl status apache2
+```
+
+- Ouvrez votre navigateur et accédez à `http://<your-server-ip>`. Vous devriez voir la page d'accueil par défaut d'Apache.
+
+![ELK](/assets/apache_elk.png)
+
+- **Étape 2** : Installer Elasticsearch sur Ubuntu
+
+- Importez la clé GPG Elasticsearch.
+
+```sh
+curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
+```
+
+- Ajoutez le référentiel Elasticsearch.
+
+```sh
+echo "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-8.x.list
+```
+
+- Mettons maintenant à jour la liste des paquets. Le dépôt est ajouté aux sources de paquets du système.
+
+```sh
+sudo apt-get update
+```
+
+- Installez Elasticsearch.
+
+```sh
+sudo apt-get install elasticsearch
+```
+
+- Activez et démarrez Elasticsearch.
+
+```sh
+sudo systemctl start elasticsearch
+sudo systemctl enable elasticsearch
+```
+
+- Vérifiez l’état d’Elasticsearch pour vous assurer qu’il est en cours d’exécution.
+
+```sh
+sudo systemctl status elasticsearch
+```
+
+- Modifier la configuration d'Elasticsearch pour l'accès à distance.
+
+```sh
+sudo nano /etc/elasticsearch/elasticsearch.yml
+```
+
+- Recherchez le network.hostparamètre, supprimez-le du commentaire et définissez-le pour `0.0.0.0` qu'il se lie à toutes les adresses IP disponibles et supprimez le commentaire de la discoverysection pour spécifier les nœuds initiaux pour la formation du cluster `discovery.seed_hosts: []`
+
+```sh
+network.host: 0.0.0.0
+
+discovery.seed_hosts: []
+```
+
+- Pour une configuration de base (non recommandée pour la production), désactivez les fonctionnalités de sécurité.
+
+```sh
+xpack.security.enable: false
+```
+
+- Redémarrez Elasticsearch pour appliquer les modifications.
+
+```sh
+sudo systemctl restart elasticsearch
+```
+
+- Pour confirmer qu'Elasticsearch est correctement configuré, envoyez une requête HTTP de test en utilisant curl.
+
+```sh
+curl -X GET "localhost:9200"
+```
+
+- Vous devriez voir une réponse JSON.
+
+```sh
+{
+  "name" : "proj1",
+  "cluster_name" : "elasticsearch",
+  "cluster_uuid" : "FdIoT_9JQXi7xggytGl6BQ",
+  "version" : {
+    "number" : "8.18.0",
+    "build_flavor" : "default",
+    "build_type" : "deb",
+    "build_hash" : "04e979aa50b657bebd4a0937389308de82c2bdad",
+    "build_date" : "2025-04-10T10:09:16.444104780Z",
+    "build_snapshot" : false,
+    "lucene_version" : "9.12.1",
+    "minimum_wire_compatibility_version" : "7.17.0",
+    "minimum_index_compatibility_version" : "7.0.0"
+  },
+  "tagline" : "You Know, for Search"
+}
+```
+
+- Vous pouvez y accéder en utilisant un navigateur avec votre `adresse IP publique : port 9200` qui est un port par défaut pour Elasticksearch.
+
+![ELK](/assets/apache_elk_01.png)
+
+- **Étape 3** : Installer Kibana sur Ubuntu
+  - Kibana fournit une interface web pour visualiser les données d'Elasticsearch. Installez Kibana avec la commande suivante :
+
+```sh
+sudo apt-get install kibana
+```
+
+- Activez et démarrez Kibana.
+
+```sh
+sudo systemctl start kibana
+sudo systemctl enable kibana
+```
+
+- Vérifiez l'état de Kibana :
+
+```sh
+sudo systemctl status kibana
+```
+
+- Ouvrez le fichier de configuration Kibana pour le modifier
+
+```sh
+sudo nano /etc/kibana/kibana.yml
+```
+
+- Décommentez et ajustez les lignes suivantes pour lier Kibana à toutes les adresses IP et le connecter à Elasticsearch.
+
+```sh
+server.port: 5601
+server.host: "0.0.0.0"
+elasticsearch.hosts: ["http://localhost:9200"]
+```
+
+- Redémarrez Kibana pour appliquer les modifications.
+
+```sh
+sudo systemctl restart kibana
+```
+
+- Accédez à l'interface Kibana en naviguant vers `http://<your-server-ip>:5601` dans votre navigateur web. Le tableau de bord Kibana s'ouvrira et vous pourrez commencer à explorer vos données.
+
+![ELK](/assets/ELK_01.png)
+
+- Vous pouvez commencer par adding integrationsou Explore on my own.
+
+![ELK](/assets/ELK_02.png)
+
+- **Étape 4** : Installer Filebeat sur Ubuntu
+  - Filebeat collecte et transmet les données de journal à Elasticsearch ou Logstash. Installez Filebeat sur votre système.
+
+```sh
+sudo apt install -y filebeat
+```
+
+- Il n'est pas nécessaire de modifier la configuration de Filebeat car par défaut, il est configuré pour envoyer des journaux à Elasticsearch.
+
+- Activez le module Apache dans Filebeat.
+
+```sh
+sudo filebeat modules enable apache
+```
+
+- Configurer le module Apache.
+
+```sh
+sudo nano /etc/filebeat/modules.d/apache.yml
+```
+
+- Assurez-vous que la configuration suivante est activée pour envoyer les journaux Apache.
+
+```sh
+- module: apache
+  access:
+    enabled: true
+    var.paths: ["/var/log/apache2/access.log*"]
+  error:
+    enabled: true
+    var.paths: ["/var/log/apache2/error.log*"]
+```
+
+- Enregistrez et quittez le fichier.
+
+- Tester la configuration.
+
+```sh
+sudo filebeat test config
+```
+
+- Appliquer les modifications de configuration de Filebeat.
+
+```sh
+sudo filebeat setup
+```
+
+- Démarrez et activez le service Filebeat.
+
+```sh
+sudo systemctl enable filebeat
+sudo systemctl start filebeat
+```
+
+- Vérifie l'état de filebeat.
+
+```sh
+sudo systemctl status filebeat
+```
+
+- Assurez-vous qu'Elasticsearch reçoit des données de Filebeat en vérifiant les index.
+
+```sh
+curl -XGET "localhost:9200/_cat/indices?v"
+```
+
+- Vous devriez voir une sortie indiquant la présence d’index créés par Filebeat.
+
+![ELK](/assets/ELK_04.png)
+
+- **Étape 5** : Vérifier les journaux Apache2 dans Kibana
+
+  - Revenez maintenant à Kibana. Faites défiler la page vers le bas et cliquez sur l' option « Journaux » dans Observability , dans le menu de navigation de gauche. Si le menu est réduit, cliquez sur l' icône « Développer » en bas à gauche pour afficher les options.
+
+- Kibana affiche les données des `journaux Apache2 des 15 dernières minutes`, sous forme d'histogramme, ainsi que les messages individuels en dessous. (Vous devrez peut-être ajuster la période.)
+
+- **Étape 6** : Génération d'une erreur 404 dans Apache2 à des fins de test
+  - Pour générer une erreur 404 Not Found et la voir dans Kibana, accédez à la page suivante sur le navigateur.
+
+```sh
+http://<public-ip-address>/this-page-does-not-exist
+```
+
+- Cette demande sera enregistrée dans le journal d'accès d'Apache et devrait être visible dans Kibana.
+
+- Actualisez maintenant la page des journaux Kibana.
+
+- Vous pouvez même consulter les détails de vos journaux Apache2, ainsi que les coordonnées de notre fournisseur cloud et d'autres informations.
+
+- **Conclusion**:
+
+  - Dans ce guide, nous avons installé avec succès Elasticsearch, Kibana et Filebeat pour surveiller les journaux Apache2 sur Ubuntu 24.04. Nous avons configuré Filebeat pour collecter les journaux d'accès et d'erreurs, et nous avons vérifié l'ingestion des journaux Apache2 dans Kibana. Grâce à cette configuration, vous pouvez surveiller efficacement les journaux Apache2 en temps réel, ce qui vous permet de suivre les erreurs, d'analyser le trafic et d'améliorer la sécurité du serveur.
