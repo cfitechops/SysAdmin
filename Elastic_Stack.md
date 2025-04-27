@@ -278,4 +278,5 @@ curl -XGET "localhost:9200/_cat/indices?v"
 ![ELK](/assets/ELK_05.png)
 
 - **Conclusion**:
-  -En conclusion, nous avons installé et configuré avec succès la suite Elastic sur Ubuntu 24.04 LTS. Cela incluait la configuration d'Elasticsearch pour la recherche et l'analyse, de Logstash pour le traitement des données, de Kibana pour la visualisation des données et de Filebeat pour l'envoi des journaux. La suite Elastic offre une solution robuste pour la journalisation et l'analyse centralisées des données, ce qui la rend précieuse pour la surveillance et l'analyse des performances système et des journaux applicatifs.
+
+  - En conclusion, nous avons installé et configuré avec succès la suite Elastic sur Ubuntu 24.04 LTS. Cela incluait la configuration d'Elasticsearch pour la recherche et l'analyse, de Logstash pour le traitement des données, de Kibana pour la visualisation des données et de Filebeat pour l'envoi des journaux. La suite Elastic offre une solution robuste pour la journalisation et l'analyse centralisées des données, ce qui la rend précieuse pour la surveillance et l'analyse des performances système et des journaux applicatifs.
