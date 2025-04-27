@@ -28,7 +28,7 @@ sudo useradd -m -U -d /opt/tomcat -s /bin/false tomcat
 - Cette commande crée un utilisateur nommé `tomcat` avec un répertoire personnel dans `/opt/tomcat` . Le shell `/bin/false` empêche l'accès à la connexion.
 
 - **Étape 3** : Installer Tomcat sur Ubuntu 24.04 LTS
-  - Installons maintenant Tomcat. Rendez-vous d'abord sur le site officiel de Tomcat et [téléchargez la dernière version de Tomcat 10](https://maven.apache.org/download.cgi). Vous pouvez utiliser `wget` pour cela.
+  - Installons maintenant Tomcat. Rendez-vous d'abord sur le site officiel de Tomcat et [téléchargez la dernière version de Tomcat 10](https://tomcat.apache.org/download-10.cgi). Vous pouvez utiliser `wget` pour cela.
 
 ```sh
 sudo wget https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.40/bin/apache-tomcat-10.1.40.tar.gz -P /tmp
