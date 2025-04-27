@@ -1,6 +1,6 @@
-# Envoyer les journaux Apache2 à Elastic Stack et Filebeat
+# Envoyer les journaux Nginx à Elastic Stack et Filebeat
 
-- Dans cet projet, nous apprenons à envoyer les journaux Apache2 à Elastic Stack et Filebeat | Comment surveiller les journaux Apache2 avec Elastic Stack et Filebeat sur Ubuntu 24.04. Elasticsearch, Kibana et Filebeat offrent une pile puissante pour la collecte, le stockage et la visualisation des journaux en temps réel. Sur un serveur web comme Apache, la surveillance des journaux est essentielle pour suivre les erreurs, les schémas de trafic et les incidents de sécurité. Ce guide explique comment configurer Elastic Stack (Elasticsearch, Kibana et Filebeat) sur Ubuntu 24.04 et configurer Filebeat pour la collecte des journaux Apache2. À la fin, vous disposerez d'un tableau de bord Kibana affichant les journaux Apache.
+- Dans cet projet, nous allons apprendre à surveiller les journaux Nginx avec Elastic Stack et Filebeat sur Ubuntu 24.04 | Envoyer les journaux Nginx à Elastic Stack et Filebeat. La surveillance des journaux Nginx est essentielle pour suivre les erreurs, analyser les schémas de trafic et identifier les menaces de sécurité. Dans ce guide, nous allons configurer Elastic Stack (Elasticsearch, Kibana et Filebeat) sur Ubuntu 24.04 et Filebeat pour collecter les journaux Nginx. À la fin, vous disposerez d'un tableau de bord Kibana visualisant vos journaux Nginx.
 
 - **Étape 1** : Configurer l'instance Ubuntu
   - Mettez à jour la liste des packages pour vous assurer que vous disposez des dernières versions.
@@ -21,21 +21,19 @@ sudo apt install openjdk-11-jdk -y
 java -version
 ```
 
-- Installez le serveur Web Apache.
+- Installez le serveur Web Nginx.
 
 ```sh
-sudo apt install apache2
+sudo apt install nginx -y
 ```
 
-- Vérifiez l’état du service Apache pour vous assurer qu’il est en cours d’exécution.
+- Vérifiez l’état de Nginx pour vous assurer qu’il est en cours d’exécution.
 
 ```sh
-sudo systemctl status apache2
+sudo systemctl status nginx
 ```
 
-- Ouvrez votre navigateur et accédez à `http://<your-server-ip>`. Vous devriez voir la page d'accueil par défaut d'Apache.
-
-![ELK](/assets/apache_elk.png)
+- Ouvrez votre navigateur et accédez à `http://<your-server-ip>`. Vous devriez voir la page d'accueil par défaut Nginx.
 
 - **Étape 2** : Installer Elasticsearch sur Ubuntu
 
@@ -191,29 +189,45 @@ sudo apt install -y filebeat
 
 - Il n'est pas nécessaire de modifier la configuration de Filebeat car par défaut, il est configuré pour envoyer des journaux à Elasticsearch.
 
-- Activez le module Apache dans Filebeat.
+- Activez le module Nginx dans Filebeat.
 
 ```sh
-sudo filebeat modules enable apache
+sudo filebeat modules enable nginx
 ```
 
-- Configurer le module Apache.
+- Configurer le module Nginx.
 
 ```sh
-sudo nano /etc/filebeat/modules.d/apache.yml
+sudo nano /etc/filebeat/modules.d/nginx.yml
 ```
 
-- Assurez-vous que la configuration suivante est activée pour envoyer les journaux Apache.
+- Assurez-vous que la configuration suivante est activée pour envoyer les journaux Nginx.
 
 ```sh
-- module: apache
+- module: nginx
+  # Access logs
   access:
     enabled: true
-    var.paths: ["/var/log/apache2/access.log*"]
 
+    # Set custom paths for the log files. If left empty,
+    # Filebeat will choose the paths depending on your OS.
+    var.paths: ["/var/log/nginx/access.log*"]
+
+  # Error logs
   error:
     enabled: true
-    var.paths: ["/var/log/apache2/error.log*"]
+
+    # Set custom paths for the log files. If left empty,
+    # Filebeat will choose the paths depending on your OS.
+    var.paths: ["/var/log/nginx/error.log*"]
+
+  # Ingress-nginx controller logs. This is disabled by default. It could be used in Kubernetes environments to parse ingress-nginx logs
+  ingress_controller:
+    enabled: false
+
+    # Set custom paths for the log files. If left empty,
+    # Filebeat will choose the paths depending on your OS.
+    #var.paths:
 ```
 
 - Enregistrez et quittez le fichier.
@@ -253,24 +267,24 @@ curl -XGET "localhost:9200/_cat/indices?v"
 
 ![ELK](/assets/ELK_04.png)
 
-- **Étape 5** : Vérifier les journaux Apache2 dans Kibana
+- **Étape 5** : Vérifier les journaux Nginx dans Kibana
 
   - Revenez maintenant à Kibana. Faites défiler la page vers le bas et cliquez sur l' option `Journaux` dans Observability , dans le menu de navigation de gauche. Si le menu est réduit, cliquez sur l' icône `Développer` en bas à gauche pour afficher les options.
 
 ![ELK](/assets/apache_elk_02.png)
 
-- Kibana affiche les données des `journaux Apache2 des 15 dernières minutes`, sous forme d'histogramme, ainsi que les messages individuels en dessous. (Vous devrez peut-être ajuster la période.)
+- Kibana affiche les données des `journaux Nginx des 15 dernières minutes`, sous forme d'histogramme, ainsi que les messages individuels en dessous. (Vous devrez peut-être ajuster la période.)
 
 ![ELK](/assets/apache_elk_03.png)
 
-- **Étape 6** : Génération d'une erreur 404 dans Apache2 à des fins de test
+- **Étape 6** : Génération d'une erreur 404 dans Nginx à des fins de test
   - Pour générer une erreur 404 Not Found et la voir dans Kibana, accédez à la page suivante sur le navigateur.
 
 ```sh
 http://<public-ip-address>/this-page-does-not-exist
 ```
 
-- Cette demande sera enregistrée dans le journal d'accès d'Apache et devrait être visible dans Kibana.
+- Cette demande sera enregistrée dans le journal d'accès d'Nginx et devrait être visible dans Kibana.
 
 ![ELK](/assets/apache_elk_04.png)
 
@@ -278,10 +292,10 @@ http://<public-ip-address>/this-page-does-not-exist
 
 ![ELK](/assets/apache_elk_05.png)
 
-- Vous pouvez même consulter les détails de vos journaux Apache2, ainsi que les coordonnées de notre fournisseur cloud et d'autres informations.
+- Vous pouvez même consulter les détails de vos journaux Nginx, ainsi que les coordonnées de notre fournisseur cloud et d'autres informations.
 
 ![ELK](/assets/apache_elk_06.png)
 
 - **Conclusion**:
 
-  - Dans ce guide, nous avons installé avec succès Elasticsearch, Kibana et Filebeat pour surveiller les journaux Apache2 sur Ubuntu 24.04. Nous avons configuré Filebeat pour collecter les journaux d'accès et d'erreurs, et nous avons vérifié l'ingestion des journaux Apache2 dans Kibana. Grâce à cette configuration, vous pouvez surveiller efficacement les journaux Apache2 en temps réel, ce qui vous permet de suivre les erreurs, d'analyser le trafic et d'améliorer la sécurité du serveur.
+  - Dans ce projet, nous avons installé avec succès la suite Elastic (Elasticsearch, Kibana et Filebeat) pour surveiller les journaux Nginx sur Ubuntu 24.04. Nous avons configuré Filebeat pour collecter les journaux d'accès et d'erreurs Nginx, garantissant ainsi une ingestion et une visualisation fluides des données. Grâce à cette configuration, vous pouvez suivre efficacement le trafic web, détecter les erreurs et améliorer les performances du serveur.
