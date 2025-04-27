@@ -226,4 +226,4 @@ Password: "zabbix"
 
 - **Conclusion**
 
-  - Dans notre tutoriel, nous vous avons présenté l'installation étape par étape de Zabbix Server sur Ubuntu 24.04. Zabbix est une solution de surveillance performante et évolutive, adaptée aux petites comme aux grandes entreprises. Si vous avez besoin d'une configuration hautement disponible, Zabbix propose une [configuration en cluster](https://www.zabbix.com/documentation/current/en/manual/concepts/server/ha) . Cette installation sur un seul serveur convient aux petites infrastructures avec moins d'appareils répartis sur un même DC.
+  - Zabbix est une solution de surveillance performante et évolutive, adaptée aux petites comme aux grandes entreprises. Si vous avez besoin d'une configuration hautement disponible, Zabbix propose une [configuration en cluster](https://www.zabbix.com/documentation/current/en/manual/concepts/server/ha) . Cette installation sur un seul serveur convient aux petites infrastructures avec moins d'appareils répartis sur un même DC.
