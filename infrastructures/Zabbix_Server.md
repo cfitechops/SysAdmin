@@ -18,7 +18,7 @@
 
   - Serveur web Apache
   - PHP et extensions requises
-  - Serveur de base de données MariaD
+  - Serveur de base de données MariaDB
 
 #### 1 - Assurez-vous que le système est mis à jour
 
