@@ -211,7 +211,7 @@ sudo systemctl restart kibana
 
 ![ELK](/assets/ELK_01.png)
 
-- Vous pouvez commencer par adding integrationsou Explore on my own.
+- Vous pouvez commencer par adding integrations ou Explore on my own.
 
 ![ELK](/assets/ELK_02.png)
 

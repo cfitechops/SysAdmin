@@ -178,7 +178,7 @@ sudo systemctl restart kibana
 
 ![ELK](/assets/ELK_01.png)
 
-- Vous pouvez commencer par adding integrationsou Explore on my own.
+- Vous pouvez commencer par adding integrations ou Explore on my own.
 
 ![ELK](/assets/ELK_02.png)
 
@@ -210,6 +210,7 @@ sudo nano /etc/filebeat/modules.d/apache.yml
   access:
     enabled: true
     var.paths: ["/var/log/apache2/access.log*"]
+
   error:
     enabled: true
     var.paths: ["/var/log/apache2/error.log*"]
@@ -254,9 +255,11 @@ curl -XGET "localhost:9200/_cat/indices?v"
 
 - **Étape 5** : Vérifier les journaux Apache2 dans Kibana
 
-  - Revenez maintenant à Kibana. Faites défiler la page vers le bas et cliquez sur l' option « Journaux » dans Observability , dans le menu de navigation de gauche. Si le menu est réduit, cliquez sur l' icône « Développer » en bas à gauche pour afficher les options.
+  - Revenez maintenant à Kibana. Faites défiler la page vers le bas et cliquez sur l' option `Journaux` dans Observability , dans le menu de navigation de gauche. Si le menu est réduit, cliquez sur l' icône `Développer` en bas à gauche pour afficher les options.
 
 - Kibana affiche les données des `journaux Apache2 des 15 dernières minutes`, sous forme d'histogramme, ainsi que les messages individuels en dessous. (Vous devrez peut-être ajuster la période.)
+
+![ELK](/assets/apache_elk_03.png)
 
 - **Étape 6** : Génération d'une erreur 404 dans Apache2 à des fins de test
   - Pour générer une erreur 404 Not Found et la voir dans Kibana, accédez à la page suivante sur le navigateur.
@@ -267,9 +270,15 @@ http://<public-ip-address>/this-page-does-not-exist
 
 - Cette demande sera enregistrée dans le journal d'accès d'Apache et devrait être visible dans Kibana.
 
+![ELK](/assets/apache_elk_04.png)
+
 - Actualisez maintenant la page des journaux Kibana.
 
+![ELK](/assets/apache_elk_05.png)
+
 - Vous pouvez même consulter les détails de vos journaux Apache2, ainsi que les coordonnées de notre fournisseur cloud et d'autres informations.
+
+![ELK](/assets/apache_elk_06.png)
 
 - **Conclusion**:
 
