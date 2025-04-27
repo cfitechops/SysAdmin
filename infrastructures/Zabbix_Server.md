@@ -20,9 +20,9 @@
   - PHP et extensions requises
   - Serveur de base de données MariaD
 
-- 1 : Assurez-vous que le système est mis à jour
+#### 1 : Assurez-vous que le système est mis à jour
 
-  - Connectez-vous à votre système Ubuntu et assurez-vous que tous les packages sont mis à jour.
+- Connectez-vous à votre système Ubuntu et assurez-vous que tous les packages sont mis à jour.
 
 ```sh
 sudo apt update && sudo apt -y upgrade
@@ -34,8 +34,9 @@ sudo apt update && sudo apt -y upgrade
 [ -f /var/run/reboot-required ] && sudo reboot -f
 ```
 
-- 2 : Installer PHP, Apache et MariaDB
-  - Installez PHP et tous les modules PHP requis pour exécuter le serveur de surveillance Zabbix sur Ubuntu.
+#### 2 : Installer PHP, Apache et MariaDB
+
+- Installez PHP et tous les modules PHP requis pour exécuter le serveur de surveillance Zabbix sur Ubuntu.
 
 ```sh
 sudo apt install php php-{snmp,cgi,mbstring,common,net-socket,gd,xml-util,mysql,bcmath,imap}
@@ -61,8 +62,9 @@ mariadb -V
 apache2 -version
 ```
 
-- 3 : Ajouter le référentiel Zabbix APT
-  - Zabbix fournit [un dépôt pour](https://www.zabbix.com/download) les systèmes Linux basés sur Debian et Red Hat. Ubuntu étant un système Linux basé sur Debian, nous téléchargeons le fichier de paquet .**deb**
+#### 3 : Ajouter le référentiel Zabbix APT
+
+- Zabbix fournit [un dépôt pour](https://www.zabbix.com/download) les systèmes Linux basés sur Debian et Red Hat. Ubuntu étant un système Linux basé sur Debian, nous téléchargeons le fichier de paquet .**deb**
 
 ```sh
 sudo apt install wget -y
@@ -75,8 +77,9 @@ wget https://repo.zabbix.com/zabbix/7.0/ubuntu/pool/main/z/zabbix-release/zabbix
 sudo dpkg -i zabbix-release_7.0-2+ubuntu24.04_all.deb
 ```
 
-- 4 : Installer et configurer le serveur Zabbix
-  - Mettre à jour la liste des packages du référentiel.
+#### 4 : Installer et configurer le serveur Zabbix
+
+- Mettre à jour la liste des packages du référentiel.
 
 ```sh
 sudo apt update
@@ -168,9 +171,9 @@ sudo systemctl enable apache2 zabbix-server zabbix-agent
 sudo systemctl status zabbix-server zabbix-agent
 ```
 
-- 5 : Configurer le serveur Zabbix à partir de l'interface Web
+#### 5 : Configurer le serveur Zabbix à partir de l'interface Web
 
-  - Ouvrez votre navigateur et accédez à l'interface Web Zabbix en utilisant l'URL `http://SeverIP/zabbix/` ou `http://hostname/zabbix/`
+- Ouvrez votre navigateur et accédez à l'interface Web Zabbix en utilisant l'URL `http://SeverIP/zabbix/` ou `http://hostname/zabbix/`
 
 - Cliquez sur `Étape suivante` et confirmez que toutes les dépendances sont respectées. Le message `OK` devrait s'afficher.
 
@@ -191,15 +194,15 @@ Password: "zabbix"
 
 - Voici une capture d’écran de ce à quoi devrait ressembler le tableau de bord.
 
-- 6 : Définissez un mot de passe utilisateur administrateur fort.
+#### 6 : Définissez un mot de passe utilisateur administrateur fort.
 
-  - Accédez à `Administration  >  Utilisateurs  >  Admin  >  Mot de passe  >  Modifier le mot de passe` comme ci-dessous.
+- Accédez à `Administration  >  Utilisateurs  >  Admin  >  Mot de passe  >  Modifier le mot de passe` comme ci-dessous.
 
 - Définissez un mot de passe fort pour l'utilisateur administrateur afin de mieux sécuriser votre installation Zabbix contre les attaques.
 
-- 7 : Ajout d'agents de surveillance au serveur Zabbix
+#### 7 : Ajout d'agents de surveillance au serveur Zabbix
 
-  - Pour ajouter un nouvel hôte cible à surveiller par Zabbix, accédez à `Configuration  >  Hôtes` , vous devriez voir l'état du serveur Zabbix local activé comme ci-dessous.
+- Pour ajouter un nouvel hôte cible à surveiller par Zabbix, accédez à `Configuration  >  Hôtes` , vous devriez voir l'état du serveur Zabbix local activé comme ci-dessous.
 
 - Les graphiques et tableaux de bord des hôtes sont accessibles via Surveillance > Hôtes . Vous pouvez ajouter d'autres hôtes en leur attribuant un nom et une adresse IP. N'oubliez pas de configurer l'agent Zabbix sur le terminal.
 
