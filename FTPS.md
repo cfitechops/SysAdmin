@@ -52,7 +52,7 @@ secure_chroot_dir=/var/run/vsftpd/empty
 pasv_enable=YES
 pasv_min_port=40000
 pasv_max_port=50000
-pasv_address=192.168.129.20  # Remplacez par votre IP
+pasv_address=172.78.0.20  # Remplacez par votre IP
 ```
 
 #### Création utilisateur
