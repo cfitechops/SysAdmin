@@ -50,7 +50,7 @@ sudo apt-get install isc-dhcp-server vim iptables-persistent -y
 - Configuration IP statique pour le serveur DHCP
 
 ```sh
-sudo nano /etc/netplan/01-static-ip.yaml
+sudo vi /etc/netplan/01-static-ip.yaml
 ```
 
 ```sh
@@ -90,7 +90,7 @@ sudo cp /etc/dhcp/dhcpd.conf /etc/dhcp/dhcpd.conf.bkp
 ```
 
 ```sh
-sudo nano /etc/dhcp/dhcpd.conf
+sudo vi /etc/dhcp/dhcpd.conf
 
 # Nettoyage des fichiers de configuration
 :g/^\$*#/d
