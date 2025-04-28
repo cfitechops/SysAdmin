@@ -1,6 +1,6 @@
 # Zabbix Alertes de notifications utilisant Gmail
 
-#### Générer un mot de passe d'application pour Gmail
+## Générer un mot de passe d'application pour Gmail
 
 ![network](/assets/Zabbix_alert_00.png)
 
@@ -8,7 +8,7 @@
 
 ![network](/assets/Zabbix_alert_02.png)
 
-#### Configurer le type de média pour Gmail
+## Configurer le type de média pour Gmail
 
 ![network](/assets/Zabbix_alert_03.png)
 
@@ -18,7 +18,7 @@
 
 ![network](/assets/Zabbix_alert_06.png)
 
-#### Ajouter une méthode de notification pour l'utilisateur
+## Ajouter une méthode de notification pour l'utilisateur
 
 ![network](/assets/Zabbix_alert_07.png)
 
@@ -26,6 +26,6 @@
 
 ![network](/assets/Zabbix_alert_09.png)
 
-#### Configurer les actions de notification (Trigger Actions)
+## Configurer les actions de notification (Trigger Actions)
 
 ![network](/assets/Zabbix_alert_10.png)
