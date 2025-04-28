@@ -98,7 +98,7 @@ sudo nano /etc/apache2/sites-available/cfitech.it.local.conf
     SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
     SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
 
-    ServerAdmin medium@diarabaka.local
+    ServerAdmin cfitech@it.local
     ServerName cfitech.it.local
     ServerAlias www.cfitech.it.local YOUR_IP_ADDRESS
     DocumentRoot /var/www/cfitech.it.local
@@ -147,7 +147,7 @@ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 - **Locality** : `Koekelberg`
 - **Organization** : `Cfitech`
 - **Organizational Unit** : `IT`
-- **Common Name** : `medium.diarabaka.loca`
+- **Common Name** : `cfitech.it.local`
 - **Email** : `YOUR EMAIL`
 
 #### Activer les modules nécessaires
