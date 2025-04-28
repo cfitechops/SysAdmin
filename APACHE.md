@@ -4,10 +4,11 @@
 
 - Dans ce guide, nous allons configurer un `serveur web Apache` sécurisé avec `HTTPS` :
 
-  - 1 - Installation d'Apache
-  - 2 - Configuration d'un Virtual Host
-  - 3 - Mise en place de SSL/TLS
-  - 4 - Redirection HTTP→HTTPS
+  - 1 - Installation et configuration d'Apache
+  - 2 - Virtual Host avec redirection HTTP→HTTPS
+  - 3 - Certificat SSL auto-signé
+  - 4 - Configuration du firewall
+  - 5 - Solution sans DNS via le fichier hosts
 
 #### Schéma d'architecture
 
@@ -37,33 +38,11 @@
 - Mise à jour du Système
 
 ```sh
-sudo apt-get update
-```
-
-- Installation d’Apache
-
-```sh
+sudo apt update
 sudo apt install apache2 -y
-```
-
-- Vérification
-
-```sh
-sudo systemctl status apache2
-```
-
-- Sortie attendue
-
-```sh
-● apache2.service - The Apache HTTP Server
-     Loaded: loaded (/lib/systemd/system/apache2.service; enabled; vendor preset: enabled)
-     Active: active (running) since ...
-```
-
-- Si Apache ne démarre pas
-
-```sh
+sudo systemctl enable apache2
 sudo systemctl start apache2
+sudo systemctl status apache2
 ```
 
 - Configuration du Site Web
@@ -109,14 +88,33 @@ sudo nano /etc/apache2/sites-available/cfitech.it.local.conf
 
 ```sh
 <VirtualHost *:80>
-    ServerAdmin cfitech@cfitech.local
     ServerName cfitech.it.local
-    ServerAlias www.cfitech.it.local
+    ServerAlias www.cfitech.it.local YOUR_IP_ADDRESS
+    Redirect permanent / https://cfitech.it.local/
+</VirtualHost>
+
+<VirtualHost *:443>
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
+    SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
+
+    ServerAdmin medium@diarabaka.local
+    ServerName cfitech.it.local
+    ServerAlias www.cfitech.it.local YOUR_IP_ADDRESS
     DocumentRoot /var/www/cfitech.it.local
-    ErrorLog ${APACHE_LOG_DIR}/error.log
-    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+    ErrorLog \${APACHE_LOG_DIR}/error.log
+    CustomLog \${APACHE_LOG_DIR}/access.log combined
+
+    <Directory /var/www/cfitech.it.local>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
 </VirtualHost>
 ```
+
+#### Explication :
 
 - `<VirtualHost *:80>` : Écoute sur le port HTTP (80).
 - `ServerName` : Nom de domaine principal.
@@ -133,19 +131,13 @@ sudo systemctl restart apache2
 
 ##### Configuration HTTPS (SSL/TLS)
 
-- Activation du Module SSL
-
-```sh
-sudo a2enmod ssl
-sudo systemctl restart apache2
-```
-
-- Génération d’un Certificat Auto-Signé
+- Génération d’un certificat auto-signé
 
 ```sh
 sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -keyout /etc/ssl/private/apache-selfsigned.key \
-    -out /etc/ssl/certs/apache-selfsigned.crt
+    -out /etc/ssl/certs/apache-selfsigned.crt \
+    -subj "/C=BE/ST=BXL/L=Koekelberg/O=Cfitech/OU=IT/CN=cfitech.it.local/emailAddress=thiernobarry554@gmail.com"
 ```
 
 - Paramètres à entrer
@@ -155,46 +147,55 @@ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 - **Locality** : `Koekelberg`
 - **Organization** : `Cfitech`
 - **Organizational Unit** : `IT`
-- **Common Name** : `Sys-Admin`
+- **Common Name** : `medium.diarabaka.loca`
 - **Email** : `YOUR EMAIL`
 
-- Configuration du Virtual Host HTTPS
-  - Modifier le fichier :
+#### Activer les modules nécessaires
 
 ```sh
-sudo nano /etc/apache2/sites-available/cfitech.it.local.conf
+sudo a2enmod ssl rewrite
+sudo a2ensite cfitech.it.local.conf
+sudo a2dissite 000-default.conf
 ```
 
-- Nouveau contenu
+- Vérifier la configuration
 
 ```sh
-<VirtualHost *:80>
-    ServerName cfitech.it.local
-    Redirect / https://YOUR_IP_ADDRESS/  # Redirige HTTP → HTTPS
-</VirtualHost>
-
-<VirtualHost *:443>
-    SSLEngine on
-    SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
-    SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
-
-    ServerAdmin cfitech@cfitech.local
-    ServerName cfitech.it.local
-    ServerAlias www.cfitech.it.local
-    DocumentRoot /var/www/cfitech.it.local
-    ErrorLog ${APACHE_LOG_DIR}/error.log
-    CustomLog ${APACHE_LOG_DIR}/access.log combined
-</VirtualHost>
+sudo apache2ctl configtest
+sudo systemctl restart apache2
 ```
 
-- Finalisation
+#### Configuration du firewall
 
 ```sh
-sudo apache2ctl configtest  # Vérifie la syntaxe
-sudo systemctl reload apache2
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw enable
 ```
 
-- Test d’Accès
+#### Configuration du fichier hosts (à faire sur toutes les machines)
+
+```sh
+# Sur le serveur Linux
+echo "YOUR_IP_ADDRESS cfitech.it.local www.cfitech.it.local" | sudo tee -a /etc/hosts
+
+# Sur les clients Windows (à exécuter dans CMD en tant qu'admin):
+echo YOUR_IP_ADDRESS cfitech.it.local www.cfitech.it.local >> C:\Windows\System32\drivers\etc\hosts
+```
+
+#### Vérification finale
+
+```sh
+# Tester depuis le serveur
+curl -k https://cfitech.it.local
+curl -k http://cfitech.it.local  # Doit rediriger vers HTTPS
+
+# Vérifier les logs
+tail -f /var/log/apache2/access.log
+tail -f /var/log/apache2/error.log
+```
+
+#### Entrez dans votre navigateur
 
 - **HTTP** : `http://YOUR_IP_ADDRESS/` → Doit rediriger vers HTTPS.
 - **HTTPS** : `https://YOUR_IP_ADDRESS/` → Affiche la page avec un avertissement (certificat auto-signé).
