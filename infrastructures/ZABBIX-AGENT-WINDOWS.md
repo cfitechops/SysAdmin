@@ -1,6 +1,6 @@
 # Zabbix Agent pour Windows
 
-#### Télécharger l'agent Zabbix pour Windows
+#### Télécharger Zabbix agent pour Windows
 
 ![Zabbix](/assets/Zabbix_Windows_00.png)
 
