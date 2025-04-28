@@ -137,7 +137,7 @@ sudo systemctl restart apache2
 sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -keyout /etc/ssl/private/apache-selfsigned.key \
     -out /etc/ssl/certs/apache-selfsigned.crt \
-    -subj "/C=BE/ST=BXL/L=Koekelberg/O=Cfitech/OU=IT/CN=cfitech.it.local/emailAddress=thiernobarry554@gmail.com"
+    -subj "/C=BE/ST=BXL/L=Koekelberg/O=Cfitech/OU=IT/CN=cfitech.it.local/emailAddress=your_email@gmail.com"
 ```
 
 - Paramètres à entrer
