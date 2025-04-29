@@ -201,8 +201,7 @@ $CONFIG = array (
   'secret' => 'HeILH3cjb/SnN1wiAapX+PsACaQnu8sZr/tQNIWrXeiyClSS',
   'trusted_domains' =>
   array (
-    0 => 'localhost',
-    1 => '192.168.129.20',
+    0 => '192.168.129.20',
   ),
   'datadirectory' => '/var/www/html/data',
   'dbtype' => 'mysql',
