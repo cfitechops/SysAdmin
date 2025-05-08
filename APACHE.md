@@ -103,8 +103,8 @@ sudo nano /etc/apache2/sites-available/cfitech.it.local.conf
     ServerAlias www.cfitech.it.local YOUR_IP_ADDRESS
     DocumentRoot /var/www/cfitech.it.local
 
-    ErrorLog \${APACHE_LOG_DIR}/error.log
-    CustomLog \${APACHE_LOG_DIR}/access.log combined
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
 
     <Directory /var/www/cfitech.it.local>
         Options Indexes FollowSymLinks
