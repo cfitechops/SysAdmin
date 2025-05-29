@@ -27,13 +27,9 @@ zabbix_agent@zabbixagent:~$ sudo nano /etc/snmp/snmpd.conf
 ```
 
 ```sh
-sysLocation    IT Room
-sysContact     thiernobarry554@gmail.com
-
-### Comment line 49 and add new content to line 50
-
-#agentaddress  127.0.0.1,[::1]
-agentaddress udp:161,udp6:[::1]:161
+sysLocation "IT Room"
+sysContact "thiernobarry554@gmail.com"
+agentAddress udp:161,udp6:[::1]:161
 ```
 
 #### Enregistrer et quitter le fichier
@@ -49,20 +45,20 @@ zabbix_agent@zabbixagent:~$ sudo systemctl stop snmpd
 - Cette commande crée un utilisateur SNMPv3 nommé snmpv3user avec un accès en lecture seule, en utilisant SHA comme protocole d'authentification avec le mot de passe auth_Password et AES comme protocole de cryptage avec le mot de passe privacy_Password.
 
 ```sh
-zabbix_agent@zabbixagent:~$ sudo net-snmp-config --create-snmpv3-user -ro -a SHA -A auth_Password -x AES -X privacy_Password snmpv3user
+zabbix_agent@zabbixagent:~$ sudo net-snmp-config --create-snmpv3-user -ro -a SHA -A "auth_Password" -x AES -X "privacy_Password" -u snmpv3user
 ```
 
 #### Maintenant, redémarrez le service SNMP pour appliquer la modification
 
 ```sh
 zabbix_agent@zabbixagent:~$ sudo systemctl restart snmpd
-zabbix_agent@zabbixagent:~$ sudo systemctl status snmpd
+zabbix_agent@zabbixagent:~$ sudo systemctl enable snmpd
 ```
 
 #### Si vous avez activé le pare-feu, vous devez autoriser le port 161 à travers le pare-feu
 
 ```sh
-zabbix_agent@zabbixagent:~$ sudo ufw allow 161
+zabbix_agent@zabbixagent:~$ sudo ufw allow 161/udp
 zabbix_agent@zabbixagent:~$ sudo ufw reload
 ```
 
@@ -79,7 +75,7 @@ zabbix_server@zabbixserver:~$ sudo apt install snmpd snmp libsnmp-dev -y
 - Vérifiez la connexion entre le serveur Zabbix et l'hôte Linux via SNMP v3
 
 ```sh
-zabbix_server@zabbixserver:~$ snmpwalk -v3 -a SHA -A auth_Password -x AES -X privacy_Password -l authPriv -u snmpv3user 192.168.129.163 | head -10
+zabbix_server@zabbixserver:~$ snmpwalk -v3 -u snmpv3user -l authPriv -a SHA -A "auth_Password" -x AES -X "privacy_Password" <IP_AGENT> | head -10
 ```
 
 #### Notez les mots de passe `SHA`, `AES` les mots de passe et le compte SNMP configurés
