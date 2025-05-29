@@ -1,14 +1,14 @@
-# Zabbix - Monitor Linux Host via SNMP v3 on Zabbix Server
+# Zabbix - Surveiller l'hôte Linux via SNMP v3 sur le serveur Zabbix
 
-- Zabbix Server
-  - IP Address: `IP Address`
-- Linux Host
-  - IP Address: `IP Address`
-  - SNMPv3 User: snmpv3user
-  - SHA Password: auth_Password
-  - AES Password: privacy_Password
+- Serveur Zabbix
+  - Adresse IP: `IP Address`
+- Hôte Linux
+  - Adresse IP: `IP Address`
+  - Utilisateur SNMPv3 : snmpv3user
+  - Mot de passe SHA : auth_Password
+  - Mot de passe AES : privacy_Password
 
-#### Install and Configure SNMP v3 on Linux Host
+#### Installer et configurer SNMP v3 sur un hôte Linux
 
 ```sh
 zabbix_agent@zabbixagent:~$ hostname -f
@@ -20,7 +20,7 @@ zabbix_agent@zabbixagent:~$ sudo systemctl restart snmpd
 zabbix_agent@zabbixagent:~$ sudo systemctl enable snmpd
 ```
 
-#### Open /etc/snmp/snmpd.conf file
+#### Ouvrir le fichier `/etc/snmp/snmpd.conf`
 
 ```sh
 zabbix_agent@zabbixagent:~$ sudo nano /etc/snmp/snmpd.conf
@@ -36,55 +36,55 @@ sysContact     thiernobarry554@gmail.com
 agentaddress udp:161,udp6:[::1]:161
 ```
 
-#### Save and exit the file
+#### Enregistrer et quitter le fichier
 
-- Create and SNMPv3 User named snmpv3user with Read-only Access
+- Créer un utilisateur SNMPv3 nommé snmpv3user avec un accès en lecture seule
 
 ```sh
 zabbix_agent@zabbixagent:~$ sudo systemctl stop snmpd
 ```
 
-#### Create an SNMPv3 user and set permission
+#### Créer un utilisateur SNMPv3 et définir les autorisations
 
-- This command creates an SNMPv3 user named snmpv3user with read-only access, using SHA as the authentication protocol with the password auth_Password, and AES as the encryption protocol with the password privacy_Password.
+- Cette commande crée un utilisateur SNMPv3 nommé snmpv3user avec un accès en lecture seule, en utilisant SHA comme protocole d'authentification avec le mot de passe auth_Password et AES comme protocole de cryptage avec le mot de passe privacy_Password.
 
 ```sh
 zabbix_agent@zabbixagent:~$ sudo net-snmp-config --create-snmpv3-user -ro -a SHA -A auth_Password -x AES -X privacy_Password snmpv3user
 ```
 
-#### Now, restart the SNMP service to apply the change
+#### Maintenant, redémarrez le service SNMP pour appliquer la modification
 
 ```sh
 zabbix_agent@zabbixagent:~$ sudo systemctl restart snmpd
 zabbix_agent@zabbixagent:~$ sudo systemctl status snmpd
 ```
 
-#### If you have the firewall enabled, you need to allow port 161 through the firewall
+#### Si vous avez activé le pare-feu, vous devez autoriser le port 161 à travers le pare-feu
 
 ```sh
 zabbix_agent@zabbixagent:~$ sudo ufw allow 161
 zabbix_agent@zabbixagent:~$ sudo ufw reload
 ```
 
-# On Zabbix Server
+# Sur le serveur Zabbix
 
-#### Check Connection between Zabbix Server and Linux Host via SNMP v3
+#### Vérifier la connexion entre le serveur Zabbix et l'hôte Linux via SNMP v3
 
-- Install SNMP v3 on Zabbix Server
+- Installer SNMP v3 sur le serveur Zabbix
 
 ```sh
 zabbix_server@zabbixserver:~$ sudo apt install snmpd snmp libsnmp-dev -y
 ```
 
-- Check the connection between the Zabbix Server and the Linux Host via SNMP v3
+- Vérifiez la connexion entre le serveur Zabbix et l'hôte Linux via SNMP v3
 
 ```sh
 zabbix_server@zabbixserver:~$ snmpwalk -v3 -a SHA -A auth_Password -x AES -X privacy_Password -l authPriv -u snmpv3user 192.168.129.163 | head -10
 ```
 
-#### Note the `SHA`, `AES` passwords, and the SNMP account configured
+#### Notez les mots de passe `SHA`, `AES` les mots de passe et le compte SNMP configurés
 
-- If the returned result is similar, it means the connection is successful!
+- Si le résultat renvoyé est similaire, cela signifie que la connexion est réussie !
 
 ```sh
 iso.3.6.1.2.1.1.1.0 = STRING: "Linux zabbixagent 6.8.0-60-generic #63-Ubuntu SMP PREEMPT_DYNAMIC Tue Apr 15 19:04:15 UTC 2025 x86_64"
@@ -99,6 +99,6 @@ iso.3.6.1.2.1.1.9.1.2.1 = OID: iso.3.6.1.6.3.10.3.1.1
 iso.3.6.1.2.1.1.9.1.2.2 = OID: iso.3.6.1.6.3.11.3.1.1
 ```
 
-#### Add Linux Host via SNMP v3 on Zabbix Server
+#### Ajouter un hôte Linux via SNMP v3 sur le serveur Zabbix
 
 ![SNMP](/assets/Zabbix_SNMP_17.png)
