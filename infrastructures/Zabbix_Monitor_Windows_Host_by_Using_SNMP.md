@@ -1,60 +1,60 @@
-# Zabbix - Monitor Windows Host by Using SNMP on Zabbix Server
+# Zabbix - Surveiller l'hôte Windows via SNMP sur le serveur Zabbix
 
-#### Configure SNMP on Windows
+#### Configurer SNMP sous Windows
 
 ![SNMP](/assets/Zabbix_SNMP_01.png)
 
 ![SNMP](/assets/Zabbix_SNMP_02.png)
 
-#### Ensure it's running...
+#### Assurez-vous qu'il fonctionne...
 
 ![SNMP](/assets/Zabbix_SNMP_03.png)
 
-#### Tab Agent
+#### Agent d'onglets
 
-- Enter your email and Location and check all
+- Entrez votre e-mail et votre emplacement et cochez tout
 
 ![SNMP](/assets/Zabbix_SNMP_04.png)
 
-#### Tab Security and Add
+#### Onglet Sécurité et Ajouter
 
 ![SNMP](/assets/Zabbix_SNMP_05.png)
 
 ![SNMP](/assets/Zabbix_SNMP_06.png)
 
-#### Accept SNMP packats from any from any host
+#### Accepter les paquets SNMP de n'importe quel hôte
 
 ![SNMP](/assets/Zabbix_SNMP_07.png)
 
 ![SNMP](/assets/Zabbix_SNMP_08.png)
 
-#### Restart SNMP service to apply the changes
+#### Redémarrez le service SNMP pour appliquer les modifications
 
 ![SNMP](/assets/Zabbix_SNMP_09.png)
 
-#### Verify IP address on windows
+#### Vérifier l'adresse IP sous Windows
 
 ![SNMP](/assets/Zabbix_SNMP_10.png)
 
-#### Verify the connection between Zabbix Server and Windows via SNMP
+#### Vérifier la connexion entre le serveur Zabbix et Windows via SNMP
 
-- Install SNMP Service on Zabbix Server if it's not already installed
+- Installez le service SNMP sur le serveur Zabbix s'il n'est pas déjà installé
 
 ```sh
 zabbix_server@zabbixserver:~$ sudo apt install snmp -y
 ```
 
-#### Note replace:
+#### Remarque :
 
-- `win22.barry.ca` = Your Community Name
+- `win22.barry.ca` = Votre nom de communauté
 
-- `192.168.129.100` = Your Windows Server IP
+- `192.168.129.100` = Votre adresse IP de serveur Windows
 
 ```sh
 zabbix_server@zabbixserver:~$ sudo snmpwalk -v2c -c win22.barry.ca 192.168.129.100
 ```
 
-#### If the returned result is similar to this. It's OK
+#### Si le résultat renvoyé est similaire à celui-ci, c'est OK.
 
 ```sh
 iso.3.6.1.2.1.55.1.11.1.4.16.255.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.1 = INTEGER: 1
@@ -80,26 +80,26 @@ iso.3.6.1.2.1.55.1.12.1.6.1.16.255.2.0.0.0.0.0.0.0.0.0.0.0.0.0.12 = INTEGER: 1
 iso.3.6.1.2.1.55.1.12.1.6.1.16.255.2.0.0.0.0.0.0.0.0.0.0.0.0.0.22 = INTEGER: 1
 ```
 
-#### Add Windows Host usin SNMP on Zabbix Server and Create host
+#### Ajouter un hôte Windows à l'aide de SNMP sur le serveur Zabbix et créer un hôte
 
 ![SNMP](/assets/Zabbix_SNMP_11.png)
 
-#### Enter Hostname of Windows Server , add Windows by SNMP
+#### Entrez le nom d'hôte du serveur Windows, ajoutez Windows via SNMP
 
 ![SNMP](/assets/Zabbix_SNMP_12.png)
 
-##### Templates/Operating systems
+##### Modèles/Systèmes d'exploitation
 
 ![SNMP](/assets/Zabbix_SNMP_13.png)
 
-#### SNMP version: `SNMPv2`
+#### Version SNMP : `SNMPv2`
 
 ![SNMP](/assets/Zabbix_SNMP_14.png)
 
-#### Tab Macros and Enter your Communuity Name
+#### Onglets `Macros` et saisissez le nom de votre communauté
 
 ![SNMP](/assets/Zabbix_SNMP_15.png)
 
-#### Monitor Windows host
+#### Surveiller l'hôte Windows
 
 ![SNMP](/assets/Zabbix_SNMP_16.png)
