@@ -1,12 +1,13 @@
 # Zabbix - Surveiller l'hôte Linux via SNMP v3 sur le serveur Zabbix
 
-- Serveur Zabbix
-  - Adresse IP: `IP Address`
-- Hôte Linux
-  - Adresse IP: `IP Address`
-  - Utilisateur SNMPv3 : snmpv3user
-  - Mot de passe SHA : auth_Password
-  - Mot de passe AES : privacy_Password
+- **Serveur Zabbix**
+  - Adresse IP: `IP X.X.X.X`
+- **Hôte Linux**
+  - Adresse IP: `IP Y.Y.Y.Y`
+- **Identifiants SNMPv3**:
+  - Utilisateur : snmpv3user
+  - Authentification : SHA avec mot de passe `auth_Password`
+  - Chiffrement : AES avec mot de passe `privacy_Password`
 
 #### Installer et configurer SNMP v3 sur un hôte Linux
 
@@ -15,21 +16,26 @@ zabbix_agent@zabbixagent:~$ hostname -f
 ```
 
 ```sh
-zabbix_agent@zabbixagent:~$ sudo apt install snmpd snmp libsnmp-dev -y
+zabbix_agent@zabbixagent:~$ sudo apt update && sudo apt install snmpd snmp libsnmp-dev -y
 zabbix_agent@zabbixagent:~$ sudo systemctl restart snmpd
 zabbix_agent@zabbixagent:~$ sudo systemctl enable snmpd
 ```
 
-#### Ouvrir le fichier `/etc/snmp/snmpd.conf`
+#### Configuration de base `/etc/snmp/snmpd.conf`
 
 ```sh
 zabbix_agent@zabbixagent:~$ sudo nano /etc/snmp/snmpd.conf
 ```
 
 ```sh
-sysLocation "IT Room"
-sysContact "thiernobarry554@gmail.com"
+# Configuration minimale
+sysLocation "IT Room, Building A"
+sysContact "admin@example.com"
 agentAddress udp:161,udp6:[::1]:161
+rocommunity public 127.0.0.1  # Accès local uniquement (optionnel)
+
+# Désactiver les accès SNMPv1/v2c (sécurité)
+disableAuthorization yes
 ```
 
 #### Enregistrer et quitter le fichier
@@ -51,8 +57,10 @@ zabbix_agent@zabbixagent:~$ sudo net-snmp-config --create-snmpv3-user -ro -a SHA
 #### Maintenant, redémarrez le service SNMP pour appliquer la modification
 
 ```sh
-zabbix_agent@zabbixagent:~$ sudo systemctl restart snmpd
-zabbix_agent@zabbixagent:~$ sudo systemctl enable snmpd
+zabbix_agent@zabbixagent:~$ sudo systemctl restart snmpd && sudo systemctl enable snmpd
+
+# Vérification locale
+zabbix_agent@zabbixagent:~$ sudo snmpwalk -v3 -u snmpv3user -l authPriv -a SHA -A "auth_Password" -x AES -X "privacy_Password" localhost system | head -5
 ```
 
 #### Si vous avez activé le pare-feu, vous devez autoriser le port 161 à travers le pare-feu
@@ -75,7 +83,9 @@ zabbix_server@zabbixserver:~$ sudo apt install snmpd snmp libsnmp-dev -y
 - Vérifiez la connexion entre le serveur Zabbix et l'hôte Linux via SNMP v3
 
 ```sh
-zabbix_server@zabbixserver:~$ snmpwalk -v3 -u snmpv3user -l authPriv -a SHA -A "auth_Password" -x AES -X "privacy_Password" <IP_AGENT> | head -10
+zabbix_server@zabbixserver:~$ snmpwalk -v3 -u snmpv3user -l authPriv -a SHA -A "auth_Password" -x AES -X "privacy_Password" <Y.Y.Y.Y> | head -10
+                              # Depuis une machine de test (ex: votre poste admin) :
+                              snmpwalk -v3 -u snmpv3user -l authPriv -a SHA -A "auth_Password" -x AES -X "privacy_Password" <IP_AGENT> 1.3.6.1.2.1.1.1
 ```
 
 #### Notez les mots de passe `SHA`, `AES` les mots de passe et le compte SNMP configurés
