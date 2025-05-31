@@ -84,8 +84,6 @@ zabbix_server@zabbixserver:~$ sudo apt install snmpd snmp libsnmp-dev -y
 
 ```sh
 zabbix_server@zabbixserver:~$ snmpwalk -v3 -u snmpv3user -l authPriv -a SHA -A "auth_Password" -x AES -X "privacy_Password" <Y.Y.Y.Y> | head -10
-                              # Depuis une machine de test (ex: votre poste admin) :
-                              snmpwalk -v3 -u snmpv3user -l authPriv -a SHA -A "auth_Password" -x AES -X "privacy_Password" <IP_AGENT> 1.3.6.1.2.1.1.1
 ```
 
 #### Notez les mots de passe `SHA`, `AES` les mots de passe et le compte SNMP configurés
@@ -96,7 +94,7 @@ zabbix_server@zabbixserver:~$ snmpwalk -v3 -u snmpv3user -l authPriv -a SHA -A "
 iso.3.6.1.2.1.1.1.0 = STRING: "Linux zabbixagent 6.8.0-60-generic #63-Ubuntu SMP PREEMPT_DYNAMIC Tue Apr 15 19:04:15 UTC 2025 x86_64"
 iso.3.6.1.2.1.1.2.0 = OID: iso.3.6.1.4.1.8072.3.2.10
 iso.3.6.1.2.1.1.3.0 = Timeticks: (104577) 0:17:25.77
-iso.3.6.1.2.1.1.4.0 = STRING: "thiernobarry554@gmail.com"
+iso.3.6.1.2.1.1.4.0 = STRING: "Your_Email4@gmail.com"
 iso.3.6.1.2.1.1.5.0 = STRING: "zabbixagent"
 iso.3.6.1.2.1.1.6.0 = STRING: "IT Room"
 iso.3.6.1.2.1.1.7.0 = INTEGER: 72
