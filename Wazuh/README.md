@@ -1,4 +1,10 @@
-# Wazuh
+# Introduction
+
+- La cybersécurité est aujourd’hui un enjeu majeur pour toutes les entreprises. Pour se protéger contre les menaces, il existe des outils capables de **détecter des comportements anormaux**, **alerter les administrateurs**, et **automatiser des réactions**.
+
+- Parmi ces outils, **Wazuh** est l’une des solutions les plus complètes et accessibles, capable de surveiller à la fois les fichiers, les connexions, les vulnérabilités et même les attaques réseau.
+
+## Wazuh
 
 - **Wazuh**, c’est un outil **gratuit et open source** qui aide à **protéger les ordinateurs, les serveurs, le cloud et même les conteneurs** (des petits systèmes qu’on utilise dans l’informatique moderne).
 
@@ -87,6 +93,26 @@
 - 2 - Il **détecte les comportements suspects ou dangereux**.
 
 - 3 - Il **vous alerte** et vous aide à prendre les bonnes décisions pour rester en sécurité.
+
+## Architecture
+
+```sh
+                   +--------------+
+                   | Tableau de   |
+                   |   bord       |
+                   +------+-------+
+                          |
+                    +-----v-----+
+                    |  Serveur   |
+                    +-----+-----+
+                          |
+     +--------------------+--------------------+
+     |                    |                    |
++----v----+         +-----v-----+        +-----v-----+
+| Agent 1 |         | Agent 2   |        | Agent 3   |
+| (Linux) |         | (Windows) |        | (Cloud)   |
++---------+         +-----------+        +-----------+
+```
 
 # Lab 1 – Surveillance des fichiers importants (FIM)
 
@@ -204,7 +230,7 @@
 
 - Si le fichier est malveillant, une notification est générée.
 
-### Installation Wazuh avec Docker
+### Installation Wazuh
 
 #### Installation AGENT
 
@@ -305,7 +331,7 @@ nano /etc/suricata/suricata.yaml
 ```sh
 vars:
   address-groups:
-    HOME_NET: "[192.168.129.58]"
+    HOME_NET: "[YOUR_IP]"
     EXTERNAL_NET: "any"
 
 default-rule-path: /etc/suricata/rules
@@ -501,6 +527,14 @@ nano /var/ossec/etc/ossec.conf
     <rules_id>5763</rules_id>
     <timeout>180</timeout>
   </active-response>
+
+  <active-response>
+    <command>host-deny</command>
+    <location>local</location>
+    <level>10</level>
+    <timeout>600</timeout>
+</active-response>
+
 </ossec_config>
 ```
 
@@ -657,10 +691,6 @@ root@agent:~# curl -Lo /root/eicar.com https://secure.eicar.org/eicar.com && sud
 
 # Conclusion
 
-- Ces 6 labs vous permettent de :
+- **Wazuh s’impose comme un véritable couteau suisse de la cybersécurité**. En combinant surveillance en temps réel, détection d’intrusions, analyse des fichiers, supervision des journaux système, détection de vulnérabilités et intégration avec des outils tels que Suricata ou VirusTotal, il offre aux administrateurs une capacité de réaction rapide et centralisée face aux menaces.
 
-  - Comprendre les **fonctions clés de Wazuh**
-
-  - Apprendre à **surveiller un système Linux ou Windows**
-
-  - **Repérer des attaques ou anomalies**, même discrètes
+- À travers ces premiers laboratoires, vous avez exploré les principales fonctionnalités de Wazuh et appris à le déployer pour protéger efficacement des environnements **Linux, Windows** et même cloud. Ce socle vous permettra d’aller plus loin dans la mise en place d’un système de sécurité robuste, adapté à votre infrastructure.
