@@ -1,6 +1,6 @@
 # Introduction
 
-- La cybersécurité est aujourd’hui un enjeu majeur pour toutes les entreprises. Pour se protéger contre les menaces, il existe des outils capables de **détecter des comportements anormaux**, **alerter les administrateurs**, et **automatiser des réactions**.
+- Aujourd’hui, la cybersécurité est un enjeu crucial pour toutes les entreprises, qu’elles soient grandes ou petites. Pour se protéger contre les menaces, il existe des outils capables de **détecter des comportements anormaux**, **alerter les administrateurs**, et **automatiser des réactions**.
 
 - Parmi ces outils, **Wazuh** est l’une des solutions les plus complètes et accessibles, capable de surveiller à la fois les fichiers, les connexions, les vulnérabilités et même les attaques réseau.
 
@@ -120,7 +120,7 @@ Agent (Linux/Windows) → Wazuh Server → Tableau de bord
                 Suricata (IDS)
 ```
 
-# Lab 1 – Surveillance des fichiers importants (FIM)
+# Lab 1 – Surveillance des Fichiers Importants (FIM)
 
 ## Objectif
 
@@ -246,21 +246,11 @@ Agent (Linux/Windows) → Wazuh Server → Tableau de bord
 
 ![agent](/Wazuh/assets/02.png)
 
-- Script d'installation de l'agent windows : `C:\Program Files > ossec-agent > win32ui`
+- Script d'installation de l'agent windows : `C:\Program Files (x86) > ossec-agent > win32ui > IP WAZUH > View > View Config > START`
 
 - [CONFIGURATIONS SPÉCIFIQUES](https://documentation.wazuh.com/current/user-manual/ruleset/ruleset-xml-syntax/rules.html)
 
-# Lab 1 – Surveillance des fichiers importants (FIM)
-
-```sh
-docker ps
-
-docker exec -it single-node-wazuh.manager-1 bash
-
-/var/ossec/bin/wazuh-control restart
-
-apt update && apt install -y nano
-```
+# Lab 1 – Surveillance des Fichiers Importants (FIM)
 
 ```sh
 nano /var/ossec/etc/ossec.conf
@@ -301,10 +291,11 @@ nano /var/ossec/etc/ossec.conf
 
 ```sh
 systemctl restart wazuh-agent
+
 touch samplefile.txt
 ```
 
-- Dans l'interface Wazuh : `Modules > agent01 > Security events`
+- Dans l'interface Wazuh : `Modules > agent01 > Security events > Events`
 
 # Lab 2 – Détection d’attaques réseau avec Suricata
 
@@ -394,7 +385,7 @@ root@attack:~# nmap -sS -T4 -Pn <IP_VICTIME>
 root@attack:~# nmap -p 22 --script ssh-brute <IP_VICTIME>
 ```
 
-- Dans l'interface Wazuh : `Modules > agent01 > Security events > rule.id`
+- Dans l'interface Wazuh : `Modules > agent01 > Security events > Events > rule.id`
 
 # Lab 3 – Analyse des vulnérabilités
 
@@ -410,7 +401,6 @@ nano /var/ossec/etc/ossec.conf
   <interval>5m</interval>
   <min_full_scan_interval>6h</min_full_scan_interval>
   <run_on_start>yes</run_on_start>
-  <alert_if_above>high</alert_if_above>
 
   <!-- Ubuntu -->
   <provider name="canonical">
@@ -478,7 +468,7 @@ nano /etc/audit/audit.rules
 -a exit,always -F euid=0 -F arch=b32 -S execve -k audit-wazuh-c
 ```
 
-- Si nécessaire, configurez : **Management > CDB lists > audit-keys**
+- Si nécessaire, configurez : `Management > CDB lists > audit-keys`
 
 ```sh
 auditctl -R /etc/audit/audit.rules
@@ -506,7 +496,7 @@ nano /var/ossec/etc/ossec.conf
 systemctl restart auditd wazuh-agent
 ```
 
-- Dans l'interface Wazuh : **Modules > agent01 > Security events**
+- Dans l'interface Wazuh : `Modules > agent01 > Security events > Events`
 
 # Lab 5 – Attaque brute-force sur SSH
 
@@ -531,8 +521,7 @@ nano /var/ossec/etc/ossec.conf
     <location>local</location>
     <level>10</level>
     <timeout>600</timeout>
-</active-response>
-
+  </active-response>
 </ossec_config>
 ```
 
@@ -540,7 +529,7 @@ nano /var/ossec/etc/ossec.conf
 service wazuh-manager restart
 ```
 
-- Modifiez : **Management > Rules > Manage rules files > 0095-sshd_rules.xml**
+- Modifiez : `Management > Rules > Manage rules files > 0095-sshd_rules.xml`
 
 - Configuration Agent pour les réponses actives
 
@@ -621,20 +610,6 @@ nano /var/ossec/etc/ossec.conf
 <syscheck>
   <!-- Surveillance renforcée -->
   <directories check_all="yes" realtime="yes" report_changes="yes">/root</directories>
-  <directories check_all="yes" realtime="yes" report_changes="yes">/home/user1</directories>
-
-  <!-- Surveillance standard pour /etc (sans report_changes global) -->
-  <directories check_all="yes" realtime="yes">/etc</directories>
-  <directories check_all="yes" realtime="yes" report_changes="yes">/etc/shadow</directories> <!-- Fichier spécifique -->
-
-  <!-- Surveillance légère pour les binaires système -->
-  <directories check_sum="yes" check_owner="yes" check_group="yes">/usr/bin,/usr/sbin</directories>
-
-  <!-- Exclusions -->
-  <ignore>/etc/adjtime</ignore>
-  <ignore>/etc/resolv.conf</ignore>
-  <ignore>/usr/bin/*.log</ignore>
-  <ignore type="sregex">\.swp$|\.tmp$</ignore>  <!-- Fichiers temporaires -->
 </syscheck>
 ```
 
@@ -683,7 +658,7 @@ systemctl restart wazuh-agent
 root@agent:~# curl -Lo /root/eicar.com https://secure.eicar.org/eicar.com && sudo ls -lah /root/eicar.com
 ```
 
-- Vérification les logs dans l'interface Wazuh : `Modules > Security events`
+- Vérification les logs dans l'interface Wazuh : `Modules > Security events > Events`
 
 # Conclusion
 
