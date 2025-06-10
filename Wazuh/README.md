@@ -250,9 +250,7 @@ Agent (Linux/Windows) → Wazuh Server → Tableau de bord
 
 - [CONFIGURATIONS SPÉCIFIQUES](https://documentation.wazuh.com/current/user-manual/ruleset/ruleset-xml-syntax/rules.html)
 
-- **Lab #1:** File Integrity Monitoring (FIM)
-
-  - Configuration FIM - Manager
+# Lab 1 – Surveillance des fichiers importants (FIM)
 
 ```sh
 docker ps
@@ -308,9 +306,7 @@ touch samplefile.txt
 
 - Dans l'interface Wazuh : `Modules > agent01 > Security events`
 
-- **Lab #2:** Detecting Network Instruction Using Suricata IDS
-
-  - Installation Suricata
+# Lab 2 – Détection d’attaques réseau avec Suricata
 
 ```sh
 add-apt-repository ppa:oisf/suricata-stable -y
@@ -400,7 +396,7 @@ root@attack:~# nmap -p 22 --script ssh-brute <IP_VICTIME>
 
 - Dans l'interface Wazuh : `Modules > agent01 > Security events > rule.id`
 
-- **Lab #3:** Détection de vulnérabilités
+# Lab 3 – Analyse des vulnérabilités
 
 ```sh
 nano /var/ossec/etc/ossec.conf
@@ -458,9 +454,7 @@ sudo wazuh-control info | grep -i "vulnerability"
 
 - Dans l'interface Wazuh : `Modules > agent01 > Vulnerabilities`
 
-- **Lab #4:** Auditd
-
-  - Installation Auditd
+# Lab 4 – Détection de commandes malveillantes
 
 ```sh
 apt install auditd -y
@@ -514,9 +508,7 @@ systemctl restart auditd wazuh-agent
 
 - Dans l'interface Wazuh : **Modules > agent01 > Security events**
 
-- **Lab #5:** Detecting and Blocking SSH brute force attacks
-
-  - Configuration Manager pour SSH brute force
+# Lab 5 – Attaque brute-force sur SSH
 
 ```sh
 nano /var/ossec/etc/ossec.conf
@@ -616,9 +608,7 @@ service wazuh-manager restart
 hydra -t 4 -l root pass.txt <IP_VICTIME> ssh
 ```
 
-- **Lab #6:** Detecting Malicious files using virustotal
-
-  - Configuration FIM
+# Lab 6 – Vérification d’un fichier suspect avec VirusTotal
 
 ```sh
 nano /var/ossec/etc/ossec.conf
