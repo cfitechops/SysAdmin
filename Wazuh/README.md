@@ -204,16 +204,6 @@
 
 - Si le fichier est malveillant, une notification est générée.
 
-# Conclusion
-
-- Ces 6 labs vous permettent de :
-
-  - Comprendre les **fonctions clés de Wazuh**
-
-  - Apprendre à **surveiller un système Linux ou Windows**
-
-  - **Repérer des attaques ou anomalies**, même discrètes
-
 ### Installation Wazuh avec Docker
 
 #### Installation AGENT
@@ -664,3 +654,13 @@ root@agent:~# curl -Lo /root/eicar.com https://secure.eicar.org/eicar.com && sud
 ```
 
 - Vérification les logs dans l'interface Wazuh : `Modules > Security events`
+
+# Conclusion
+
+- Ces 6 labs vous permettent de :
+
+  - Comprendre les **fonctions clés de Wazuh**
+
+  - Apprendre à **surveiller un système Linux ou Windows**
+
+  - **Repérer des attaques ou anomalies**, même discrètes
