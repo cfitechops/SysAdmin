@@ -112,6 +112,12 @@
 | Agent 1 |         | Agent 2   |        | Agent 3   |
 | (Linux) |         | (Windows) |        | (Cloud)   |
 +---------+         +-----------+        +-----------+
+
+
+
+Agent (Linux/Windows) → Wazuh Server → Tableau de bord
+                      ↑
+                Suricata (IDS)
 ```
 
 # Lab 1 – Surveillance des fichiers importants (FIM)
