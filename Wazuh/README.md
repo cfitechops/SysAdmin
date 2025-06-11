@@ -279,15 +279,15 @@ service wazuh-manager restart
 nano /var/ossec/etc/ossec.conf
 ```
 
-- Ajout ceci dans le fichier de configuration de Wazuh Agent
+- Ajout ceci dans le fichier de configuration de Wazuh Agent, tout vérifier, signaler, alertes en temps réel.
 
 ```sh
 <syscheck>
   <directories check_all="yes" realtime="yes" report_changes="yes">/root</directories>
-  <frequency>3600</frequency>
-  <scan_on_start>yes</scan_on_start>
 </syscheck>
 ```
+
+- Cela pourrait créer beaucoup d'alertes inutiles mais c'est bon dans notre environnement de laboratoire, car sa montre les alertes en temps réel.
 
 ```sh
 systemctl restart wazuh-agent
@@ -324,29 +324,18 @@ nano /etc/suricata/suricata.yaml
 ```sh
 vars:
   address-groups:
-    HOME_NET: "[YOUR_IP]"
-    EXTERNAL_NET: "any"
+    HOME_NET: "[AGENT_IP]"  # À remplacer par l'IP réelle ou une variable définie
+    EXTERNAL_NET: "any"     # Capture tout le trafic non-local
 
 default-rule-path: /etc/suricata/rules
-
 rule-files:
-  - "*.rules"
+  - "*.rules"               # Charge toutes les règles disponibles
 
 stats:
-  enabled: yes
+  enabled: yes              # Active les statistiques globales
 
 af-packet:
-  - interface: enp0s3
-    threads: auto               # Utilise tous les CPU dispo
-    cluster-id: 99              # Identifiant de groupe de capture
-    cluster-type: cluster_flow  # Classe les flux réseau pour mieux gérer
-    defrag: yes                 # Réassemble les paquets fragmentés
-
-outputs:
-  - eve-log:
-      enabled: yes
-      filetype: regular
-      filename: /var/log/suricata/eve.json
+  - interface: enp0s3       # Interface réseau à surveiller
 ```
 
 - Configuration Wazuh pour Suricata
@@ -415,13 +404,6 @@ nano /var/ossec/etc/ossec.conf
     <enabled>yes</enabled>
     <update_interval>1h</update_interval>
   </provider>
-
-  <!-- Red Hat (optionnel) -->
-  <provider name="redhat">
-    <enabled>yes</enabled>
-    <os>8</os>
-    <os>9</os>
-  </provider>
 </vulnerability-detection>
 ```
 
@@ -467,6 +449,50 @@ nano /etc/audit/audit.rules
 -a exit,always -F euid=0 -F arch=b64 -S execve -k audit-wazuh-c
 -a exit,always -F euid=0 -F arch=b32 -S execve -k audit-wazuh-c
 ```
+
+#### Explication de la règle
+
+- **-a exit,always**
+
+  - Enregistre l'événement **à la sortie** (**exit**) d'un appel système.
+
+  - **always** garantit que l'action est toujours journalisée.
+
+- **-F euid=0**
+
+  - Filtre les actions où **l'UID effectif est 0 (root)**. Cela capture :
+
+    - Les commandes exécutées via **sudo**.
+
+    - Les processus lancés directement par root.
+
+- **-F arch=b64 ou -F arch=b32**
+
+  - Cible les appels système en **64 bits (b64)** ou **32 bits (b32)**.
+
+  - Couvre toutes les exécutions de programmes (même les binaires anciens en 32 bits).
+
+- **-S execve**
+
+  - Surveille l'appel système **execve()** (utilisé pour exécuter des programmes).
+
+- **-k audit-wazuh-c**
+
+  - Associe une **clé (key)** aux logs générés, facilitant leur filtrage dans Wazuh.
+
+#### Pourquoi cette règle est utile ?
+
+- **Détection d'abus de privilèges** :
+
+  - Un attaquant exploitant **sudo** ou une élévation de privilèges sera journalisé.
+
+- **Conformité** :
+
+  - Répond aux exigences de traçabilité des actions root (PCI-DSS, ISO 27001).
+
+    - Les logs marqués avec **audit-wazuh-c** peuvent être analysés par Wazuh pour générer des alertes.
+
+- **Intégration avec Wazuh** :
 
 - Si nécessaire, configurez : `Management > CDB lists > audit-keys`
 
