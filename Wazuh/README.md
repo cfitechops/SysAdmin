@@ -687,4 +687,4 @@ root@agent:~# curl -Lo /root/eicar.com https://secure.eicar.org/eicar.com && sud
 
 - **Wazuh s’impose comme un véritable couteau suisse de la cybersécurité**. En combinant surveillance en temps réel, détection d’intrusions, analyse des fichiers, supervision des journaux système, détection de vulnérabilités et intégration avec des outils tels que Suricata ou VirusTotal, il offre aux administrateurs une capacité de réaction rapide et centralisée face aux menaces.
 
-- À travers ces premiers laboratoires, vous avez exploré les principales fonctionnalités de Wazuh et appris à le déployer pour protéger efficacement des environnements **Linux, Windows** et même cloud. Ce socle vous permettra d’aller plus loin dans la mise en place d’un système de sécurité robuste, adapté à votre infrastructure.
+- À travers ces projets, vous avez exploré les principales fonctionnalités de Wazuh et appris à le déployer pour protéger efficacement des environnements **Linux, Windows** et même cloud. Ce socle vous permettra d’aller plus loin dans la mise en place d’un système de sécurité robuste, adapté à votre infrastructure.
