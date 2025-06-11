@@ -562,7 +562,36 @@ firewall-drop          ip-customblock  kaspersky.py  restart-wazuh  wazuh-slack
 root@wazuh:/var/ossec/active-response/bin#
 ```
 
+- Pour tester l'attaque par force brute SSH
+
+```sh
+hydra -t 4 -l root pass.txt <IP_VICTIME> ssh
+```
+
+# Lab 6 – Vérification d’un fichier suspect avec VirusTotal
+
+- Virus Total est une plate-forme de renseignement sur les menaces où vous pouvez soumettre un échantillon de logiciel malveillant ou tout fichier suspect. Vous pouvez soumettre une adress IP. Vous pouvez soumettre n'importe quel domaine ou nom de domaine complet ou tout hachage d'un fichier.
+- Il soumettra ensuite cet échantillon à des centaines d'antivirus, puis il vous donnera le rapport si ces données, ces artifacts ou l'échantillon sont infectés ou non.
+
+```sh
+nano /var/ossec/etc/ossec.conf
+```
+
 - Ajout ceci dans le fichier de configuration de Wazuh Agent
+
+```sh
+# <!-- File integrity monitoring -->
+<syscheck>
+  <!-- Surveillance renforcée -->
+  <directories check_all="yes" realtime="yes" report_changes="yes">/root</directories>
+</syscheck>
+```
+
+```sh
+systemctl restart wazuh-agent
+```
+
+- Ajout ceci dans le fichier de configuration de wazuh manager
 
 ![agent](/Wazuh/assets/03.png)
 
@@ -610,35 +639,6 @@ service wazuh-manager restart
 ```
 
 - Dans l'interface Wazuh : `Modules > agent01 > Security events`
-
-#### Pour tester l'attaque par force brute SSH
-
-```sh
-hydra -t 4 -l root pass.txt <IP_VICTIME> ssh
-```
-
-# Lab 6 – Vérification d’un fichier suspect avec VirusTotal
-
-- Virus Total est une plate-forme de renseignement sur les menaces où vous pouvez soumettre un échantillon de logiciel malveillant ou tout fichier suspect. Vous pouvez soumettre une adress IP. Vous pouvez soumettre n'importe quel domaine ou nom de domaine complet ou tout hachage d'un fichier.
-- Il soumettra ensuite cet échantillon à des centaines d'antivirus, puis il vous donnera le rapport si ces données, ces artifacts ou l'échantillon sont infectés ou non.
-
-```sh
-nano /var/ossec/etc/ossec.conf
-```
-
-- Ajout ceci dans le fichier de configuration de Wazuh Agent
-
-```sh
-# <!-- File integrity monitoring -->
-<syscheck>
-  <!-- Surveillance renforcée -->
-  <directories check_all="yes" realtime="yes" report_changes="yes">/root</directories>
-</syscheck>
-```
-
-```sh
-systemctl restart wazuh-agent
-```
 
 - Modification : `Management > Rules > Manage rules files > Edit local_rules.xml`
 
