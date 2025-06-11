@@ -540,13 +540,7 @@ nano /var/ossec/etc/ossec.conf
     <location>local</location>
     <rules_id>5763</rules_id>
     <timeout>180</timeout>
-  </active-response>
-
-  <active-response>
-    <command>host-deny</command>
-    <location>local</location>
-    <level>10</level>
-    <timeout>600</timeout>
+    <alert_notif>yes</alert_notif>  <!-- Active les notifications -->
   </active-response>
 </ossec_config>
 ```
@@ -555,7 +549,7 @@ nano /var/ossec/etc/ossec.conf
 service wazuh-manager restart
 ```
 
-- Modifiez : `Management > Rules > Manage rules files > 0095-sshd_rules.xml`
+- Modifiez : `Management > Rules > Manage rules files > ssh`
 
 - Configuration Agent pour les réponses actives
 
@@ -624,6 +618,9 @@ hydra -t 4 -l root pass.txt <IP_VICTIME> ssh
 ```
 
 # Lab 6 – Vérification d’un fichier suspect avec VirusTotal
+
+- Virus Total est une plate-forme de renseignement sur les menaces où vous pouvez soumettre un échantillon de logiciel malveillant ou tout fichier suspect. Vous pouvez soumettre une adress IP. Vous pouvez soumettre n'importe quel domaine ou nom de domaine complet ou tout hachage d'un fichier.
+- Il soumettra ensuite cet échantillon à des centaines d'antivirus, puis il vous donnera le rapport si ces données, ces artifacts ou l'échantillon sont infectés ou non.
 
 ```sh
 nano /var/ossec/etc/ossec.conf
