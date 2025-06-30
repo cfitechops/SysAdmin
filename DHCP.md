@@ -37,9 +37,8 @@
 #### Installation des paquets nécessaires
 
 ```sh
-sudo -i
-sudo apt-get update
-sudo apt-get install isc-dhcp-server vim iptables-persistent -y
+sudo apt update
+sudo apt install isc-dhcp-server iptables-persistent vim -y
 ```
 
 - `isc-dhcp-server` → Service DHCP principal
@@ -60,16 +59,15 @@ network:
   ethernets:
     enp0s3:
       addresses:
-        - 192.168.10.2/24              # IP statique du serveur
+        - 192.168.10.2/24
       nameservers:
-        addresses: [8.8.8.8, 8.8.4.4]  # DNS Google
+        addresses: [8.8.8.8, 8.8.4.4]
       routes:
         - to: default
-          via: 192.168.10.254          # Passerelle
+          via: 192.168.10.254
 ```
 
 ```sh
-sudo chmod 600 /etc/netplan/*.yaml
 sudo netplan apply
 ```
 
@@ -77,8 +75,7 @@ sudo netplan apply
 
 ```sh
 sudo cp /etc/default/isc-dhcp-server /etc/default/isc-dhcp-server.bkp
-
-echo 'INTERFACESv4="enp0s3"' > /etc/default/isc-dhcp-server
+echo 'INTERFACESv4="enp0s3"' | sudo tee /etc/default/isc-dhcp-server
 ```
 
 #### Configuration du serveur DHCP
@@ -87,10 +84,7 @@ echo 'INTERFACESv4="enp0s3"' > /etc/default/isc-dhcp-server
 
 ```sh
 sudo cp /etc/dhcp/dhcpd.conf /etc/dhcp/dhcpd.conf.bkp
-```
-
-```sh
-sudo vi /etc/dhcp/dhcpd.conf
+sudo vim /etc/dhcp/dhcpd.conf
 
 # Nettoyage des fichiers de configuration
 :g/^\$*#/d
@@ -99,25 +93,26 @@ sudo vi /etc/dhcp/dhcpd.conf
 - Ajoutez les paramètres suivants
 
 ```sh
-# Paramètres globaux du serveur DHCP
-option domain-name "example.local";                # Nom de domaine interne (Active Directory si applicable)
-option domain-name-servers 192.168.10.2, 8.8.8.8;  # DNS interne et externe (Google DNS en secours)
-default-lease-time 600;                            # Durée par défaut du bail en secondes (10 minutes)
-max-lease-time 7200;                               # Durée maximale du bail en secondes (2 heures)
-ddns-update-style none;                            # Désactiver les mises à jour dynamiques DNS
+# Paramètres globaux
+option domain-name "example.local";
+option domain-name-servers 8.8.8.8, 1.1.1.1;
+default-lease-time 600;
+max-lease-time 7200;
+ddns-update-style none;
 authoritative;
 
+# Sous-réseau principal
 subnet 192.168.10.0 netmask 255.255.255.0 {
-    range 192.168.10.50 192.168.10.200;                # Plage d'adresses IP dynamiques attribuées aux clients DHCP
-    option routers 192.168.10.1;                       # Adresse IP du serveur DHCP (passerelle par défaut)
-    option subnet-mask 255.255.255.0;                  # Masque de sous-réseau
-    option domain-name-servers 192.168.10.2, 8.8.8.8;  # DNS interne et externe
+    range 192.168.10.50 192.168.10.200;
+    option routers 192.168.10.254;
+    option subnet-mask 255.255.255.0;
+    option domain-name-servers 8.8.8.8, 1.1.1.1;
 }
 
-# Configuration d'une réservation statique pour un périphérique spécifique (par exemple, un serveur ou une imprimante)
-host reserved-client {   # Réservation IP fixe
-    hardware ethernet 08:00:27:bd:22:0c;   # Adresse MAC du périphérique réservé
-    fixed-address 192.168.10.50;           # Adresse IP réservée au périphérique
+# Réservation statique (exemple : imprimante)
+host reserved-client {
+    hardware ethernet 08:00:27:bd:22:0c;
+    fixed-address 192.168.10.50;
 }
 ```
 
@@ -130,38 +125,39 @@ host reserved-client {   # Réservation IP fixe
 #### Démarrage et vérification
 
 ```sh
-dhcpd -t
-systemctl restart isc-dhcp-server
-systemctl enable isc-dhcp-server
-systemctl status isc-dhcp-server
+sudo dhcpd -t                             # Vérification syntaxique
+sudo systemctl restart isc-dhcp-server    # Redémarrage du service
+sudo systemctl enable isc-dhcp-server     # Activation au démarrage
+sudo systemctl status isc-dhcp-server     # Vérification du statut
 ```
 
-#### Activation du NAT pour Internet
+#### Activation du NAT pour l’accès Internet
 
 ```sh
-echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf  # Active le routage IP
-sysctl -p
-
-iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE  # Masquage NAT
-iptables -A FORWARD -i enp0s3 -o eth0 -m state --state RELATED,ESTABLISHED -j ACCEPT
-iptables -A FORWARD -i eth0 -o enp0s3 -j ACCEPT
-
-iptables-save > /etc/iptables/rules.v4  # Sauvegarde des règles
+echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
 ```
 
-#### Surveillance et maintenance
-
-- Pour surveiller les baux DHCP:
+- Configurer les règles NAT (remplacez enp0s8 par l’interface vers Internet) :
 
 ```sh
-systemctl status isc-dhcp-server      # Vérifie l’état du service
-
-dhcp-lease-list                       # Liste les baux actifs
-tail -f /var/log/syslog | grep dhcpd  # Logs en temps réel
+sudo iptables -t nat -A POSTROUTING -o enp0s8 -j MASQUERADE
+sudo iptables -A FORWARD -i enp0s3 -o enp0s8 -m state --state RELATED,ESTABLISHED -j ACCEPT
+sudo iptables -A FORWARD -i enp0s8 -o enp0s3 -j ACCEPT
+sudo iptables-save | sudo tee /etc/iptables/rules.v4
 ```
 
-- **Conclusion**:
+#### Vérification des baux et surveillance
 
-  - Le serveur DHCP simplifie la gestion des adresses IP dans un réseau.
-  - Les réservations statiques sont utiles pour les équipements critiques.
-  - Le NAT permet aux clients d’accéder à Internet via le serveur.
+```sh
+sudo dhcp-lease-list                          # Liste des baux attribués
+tail -f /var/log/syslog | grep dhcpd          # Logs en temps réel
+journalctl -xeu isc-dhcp-server.service       # Logs système détaillés
+```
+
+#### Dépannage côté client (Linux)
+
+```sh
+sudo dhclient -v        # Demande d'adresse IP en mode verbeux
+ip a                    # Vérification de l'adresse reçue
+```
