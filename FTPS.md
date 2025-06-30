@@ -7,10 +7,6 @@
   - Authentification obligatoire (pas d'accès anonyme)
   - Compatibilité avec FileZilla, WinSCP et autres clients modernes
 
-#### Réseau (Bridged Adapter)
-
-![ftp](/assets/ftp.png)
-
 - → En mode `Bridge`, le serveur apparaît comme un appareil indépendant sur le réseau local.
 
 #### Mise à jour et installation
@@ -19,17 +15,19 @@
 sudo apt update && sudo apt install vsftpd -y
 ```
 
-#### Sauvegarde de la config originale
+#### Sauvegarde de la configuration originale
 
 ```sh
 sudo cp /etc/vsftpd.conf /etc/vsftpd.conf.original
 ```
 
-#### Configuration de base
+#### Configuration de vsftpd
 
 ```sh
 sudo nano /etc/vsftpd.conf
 ```
+
+- Ajoutez ou modifiez les lignes suivantes
 
 ```sh
 # Réseau
@@ -41,7 +39,7 @@ anonymous_enable=NO
 local_enable=YES
 write_enable=YES
 
-# Sécurité
+# Sécurité et isolation
 chroot_local_user=YES
 chroot_list_enable=YES
 chroot_list_file=/etc/vsftpd.chroot_list
@@ -52,38 +50,9 @@ secure_chroot_dir=/var/run/vsftpd/empty
 pasv_enable=YES
 pasv_min_port=40000
 pasv_max_port=50000
-pasv_address=172.78.0.20  # Remplacez par votre IP
-```
+pasv_address=172.78.0.20  # Remplacez par l’IP de votre serveur
 
-#### Création utilisateur
-
-```sh
-sudo useradd -m -d /home/cfitech -s /bin/bash cfitech
-sudo passwd mypassword
-```
-
-#### Autorisation chroot
-
-```sh
-echo "cfitech" | sudo tee /etc/vsftpd.chroot_list
-```
-
-#### Configuration SSL/TLS
-
-```sh
-sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-    -keyout /etc/ssl/private/vsftpd.pem \
-    -out /etc/ssl/certs/vsftpd.pem \
-    -subj "/C=FR/ST=Paris/L=Paris/O=MyOrg/CN=ftp-server"
-```
-
-#### Configuration SSL (ajout)
-
-```sh
-sudo nano /etc/vsftpd.conf
-```
-
-```sh
+# SSL/TLS
 rsa_cert_file=/etc/ssl/certs/vsftpd.pem
 rsa_private_key_file=/etc/ssl/private/vsftpd.pem
 ssl_enable=YES
@@ -97,18 +66,40 @@ require_ssl_reuse=NO
 ssl_ciphers=HIGH
 ```
 
-#### Configuration du firewall
+#### Création de l'utilisateur FTP
 
 ```sh
+sudo useradd -m -d /home/thierno -s /bin/bash thierno
+sudo passwd thierno  # Définir le mot de passe
+```
+
+#### Autorisation dans le chroot
+
+```sh
+echo "thierno chroot" | sudo tee /etc/vsftpd.chroot_list
+```
+
+#### Génération du certificat SSL
+
+```sh
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout /etc/ssl/private/vsftpd.pem \
+  -out /etc/ssl/certs/vsftpd.pem \
+  -subj "/C=FR/ST=Paris/L=Paris/O=MyOrg/CN=ftp-server"
+```
+
+#### Configuration du pare-feu UFW
+
+```sh
+sudo ufw allow 20/tcp           # FTP - Data
+sudo ufw allow 21/tcp           # FTP - Control
+sudo ufw allow 990/tcp          # FTPS implicite
+sudo ufw allow 40000:50000/tcp  # Mode passif
 sudo ufw enable
-sudo ufw allow 20/tcp           # FTP Data (Actif)
-sudo ufw allow 21/tcp           # FTP Control
-sudo ufw allow 990/tcp          # FTPS Implicite
-sudo ufw allow 40000:50000/tcp  # FTP Passif Ports
 sudo ufw status
 ```
 
-#### Redémarrage des services
+#### Redémarrage et activation du service
 
 ```sh
 sudo systemctl restart vsftpd
@@ -116,16 +107,22 @@ sudo systemctl enable vsftpd
 sudo systemctl status vsftpd
 ```
 
-#### Pour une sécurité maximale, ajoutez après installation :
+#### Sécurisation du dossier utilisateur
 
 ```sh
-sudo chmod 750 /home/cfitech
-sudo chown -R cfitech:cfitech /home/cfitech/ftp
+sudo chmod 750 /home/thierno
+sudo mkdir -p /home/thierno/ftp
+sudo chown -R thierno:thierno /home/thierno/ftp
 ```
 
-#### Test
+#### Test de connexion FTPS
 
 ```sh
-curl -k --ssl-reqd ftp://localhost/ -u cfitech
-curl -k --ssl-reqd ftp://localhost/ -u cfitech:mypassword
+curl -k --ssl-reqd ftp://localhost/ -u thierno
+```
+
+#### Connexion avec mot de passe dans la commande (attention à la sécurité) :
+
+```sh
+curl -k --ssl-reqd ftp://localhost/ -u thierno:mypassword
 ```
