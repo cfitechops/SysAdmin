@@ -1,364 +1,207 @@
-# DNS
+# Serveur DNS avec BIND9 sur Ubuntu Server
 
-- La configuration d'une infrastructure DNS fiable et sécurisée est essentielle pour assurer la disponibilité et la performance des services réseau. Un système DNS bien conçu repose sur une architecture primaire/secondaire (maître/esclave) qui garantit la redondance, la répartition de charge et la continuité de service en cas de défaillance du serveur primaire.
+## Configuration IP statique avec Netplan
 
-- Dans ce guide, nous allons déployer une solution DNS complète avec :
-
-  - **Un serveur DNS primaire** (maître) qui héberge les zones principales
-  - **Un serveur DNS secondaire** (esclave) qui réplique les données pour assurer la haute disponibilité
-  - **Des zones directes (A, CNAME) et inverses (PTR)** correctement configurées
-  - **Une sécurité renforcée** (transferts de zone restreints, DNSSEC optionnel)
-  - **Des mécanismes de vérification** pour valider la configuration
-
-- Cette solution utilise **BIND9** sous **Ubuntu**, la référence pour les serveurs DNS, et suit les meilleures pratiques en matière de sécurité et de performance.
-
-#### 1. Architecture Réseau
-
-- Les clients interrogent indifféremment le primaire ou le secondaire.
-- Le secondaire réplique les zones via des transferts AXFR(Full Zone Transfer) / IXFR(Incremental Zone Transfer) sécurisés.
-- Les requêtes externes (hors zone) sont forwardées vers Google DNS.
-
-![dns](/assets/dns1.png)
-
-#### 2. Flux des Requêtes
-
-- Priorité au serveur primaire, bascule automatique vers le secondaire si échec.
-- Mécanisme de résolution hiérarchique (locale → forwarders → root).
-
-![dns](/assets/dns2.png)
-
-#### 3. Zones DNS
-
-- La zone directe gère la résolution **nom → IP**.
-- La zone inverse gère la résolution **IP → nom** (essentielle pour les vérifications anti-spam).
-
-![dns](/assets/dns3.png)
-
-#### Table des matières
-
-- **Redondance** : Deux serveurs minimum (RFC 2182).
-- **Sécurité** : Transferts de zone restreints par IP (allow-transfer).
-- **Maintenabilité** : Serial incrémenté à chaque modification.
-- **Performance** : Cache optimisé (TTL) et forwarders configurés.
-
-#### Serveur Primaire (192.168.1.2)
-
-- Mise à jour du système
+#### Édition du fichier de configuration
 
 ```sh
-sudo apt update && sudo apt upgrade -y
+sudo nano /etc/netplan/00-installer-config.yaml
 ```
 
-- Installation de Bind9
-
-```sh
-sudo apt install bind9 bind9utils bind9-doc -y
-```
-
-- Activation du service
-
-```sh
-sudo systemctl enable bind9
-sudo systemctl start bind9
-```
-
-- Configuration du pare-feu
-
-```sh
-sudo ufw allow 53
-sudo ufw reload
-```
-
-- Configuration réseau (IP statique)
-  - Configuration du serveur primaire
-
-```sh
-sudo nano /etc/netplan/01-netcfg.yaml
-```
-
-- Configuration IP statique
+- contenu
 
 ```sh
 network:
   version: 2
-  renderer: networkd
   ethernets:
     enp0s3:
       dhcp4: false
-      addresses: [192.168.1.2/24]
-      routes:
-        - to: default
-          via: 192.168.1.1
+    enp0s8:
+      addresses: [192.168.129.172/24]
       nameservers:
-        addresses: [192.168.1.2, 192.168.1.3]
+        addresses: [1.1.1.1, 8.8.8.8]
 ```
 
-- Appliquez la configuration
+#### Application de la configuration
 
 ```sh
 sudo netplan apply
 ```
 
-- Configuration des options Bind9
+#### Installation de BIND9 et activation du pare-feu
+
+```sh
+sudo apt update
+sudo apt install bind9 bind9-utils -y
+```
+
+#### Activation et autorisation UFW
+
+```sh
+sudo ufw enable
+sudo ufw allow bind9
+sudo ufw status
+```
+
+#### Démarrage de BIND9
+
+```sh
+sudo systemctl start bind9
+sudo systemctl status bind9
+```
+
+#### Configuration de BIND : named.conf.options
 
 ```sh
 sudo nano /etc/bind/named.conf.options
 ```
 
-- Ajoutez ou modifiez les options suivantes
-
 ```sh
 options {
     directory "/var/cache/bind";
-
+    listen-on { any; };
+    allow-query { localhost; 192.168.129.0/24; };
     forwarders {
         8.8.8.8;
-        8.8.4.4;
     };
-
-    dnssec-validation auto;
-
-    listen-on { any; };
-    listen-on-v6 { any; };
-    allow-query { any; };
-    allow-transfer { 192.168.1.3; }; // Seulement vers le secondaire
-    recursion yes;
+    dnssec-validation no;
 };
 ```
 
-- Redémarrez Bind9 pour appliquer les modifications
+#### Forcer l'utilisation d'IPv4
 
 ```sh
+sudo nano /etc/default/named
+```
+
+```sh
+OPTIONS="-u bind -4"
+```
+
+```sh
+sudo named-checkconf
 sudo systemctl restart bind9
 ```
 
-- Configuration des zones
+#### Déclaration des zones DNS
 
 ```sh
 sudo nano /etc/bind/named.conf.local
 ```
 
-- Contenu du fichier
+- Contenu
 
 ```sh
-zone "cfitech-it.com" {
+zone "diarabaka.local" IN {
     type master;
-    file "/etc/bind/db.cfitech-it.com";
-    allow-transfer { 192.168.1.3; };  # Autorise le transfert vers le serveur secondaire.
-    also-notify { 192.168.1.3; };     # Notifie le serveur secondaire des mises à jour.
+    file "/etc/bind/zones/db.diarabaka.local";
 };
 
-zone "1.168.192.in-addr.arpa" {
+zone "129.168.192.in-addr.arpa" {
     type master;
-    file "/etc/bind/db.rev.cfitech-it.com";
-    allow-transfer { 192.168.1.3; };
+    file "/etc/bind/zones/db.129.168.192";
 };
 ```
 
-- Créez un fichier pour la zone directe
+#### Création des fichiers de zones
 
 ```sh
-sudo cp /etc/bind/db.local /etc/bind/db.cfitech-it.com
+sudo mkdir -p /etc/bind/zones
+sudo cp /etc/bind/db.local /etc/bind/zones/db.diarabaka.local
+```
+
+#### Zone directe : db.diarabaka.local
+
+```sh
+sudo nano /etc/bind/zones/db.diarabaka.local
 ```
 
 ```sh
-sudo nano /etc/bind/db.cfitech-it.com
+$TTL 604800
+@       IN  SOA dns01.diarabaka.local. root.diarabaka.local. (
+                2         ; Serial
+           604800         ; Refresh
+            86400         ; Retry
+          2419200         ; Expire
+           604800 )       ; Negative Cache TTL
+;
+        IN  NS  dns01.diarabaka.local.
+dns01   IN  A   192.168.129.172
+server  IN  CNAME dns01
 ```
 
-- Contenu du fichier
+#### Zone inverse : db.129.168.192
 
 ```sh
-$TTL    604800
-@       IN      SOA     ns.cfitech-it.com. admin.cfitech-it.com. (
-                        2025040201 ; Serial   (à incrémenter lors des modifications)
-                        10h        ; Refresh
-                        15m        ; Retry
-                        48h        ; Expire
-                        604800 )   ; Negative Cache TTL
-
-; Serveurs DNS
-@       IN      NS      ns.cfitech-it.com.
-@       IN      NS      ns2.cfitech-it.com.
-
-; Enregistrements A
-@       IN      A       192.168.1.2  ; Serveur primaire.
-ns      IN      A       192.168.1.2
-ns2     IN      A       192.168.1.3  ; Serveur secondaire.
-www     IN      CNAME   ns           ; Alias vers ns.
-router  IN      A       192.168.1.1  ; Routeur local.
-```
-
-- Créez un fichier pour la zone inversée
-
-```sh
-sudo cp /etc/bind/db.local /etc/bind/db.rev.cfitech-it.com
-```
-
-- Zone inverse
-
-```sh
-sudo nano /etc/bind/db.rev.cfitech-it.com
+sudo cp /etc/bind/zones/db.diarabaka.local /etc/bind/zones/db.129.168.192
+sudo nano /etc/bind/zones/db.129.168.192
 ```
 
 ```sh
-$TTL    604800
-@       IN      SOA     ns.cfitech-it.com. admin.cfitech-it.com. (
-                        2025040201 ; Serial
-                        10h        ; Refresh
-                        15m        ; Retry
-                        48h        ; Expire
-                        604800 )   ; Negative Cache TTL
-
-@       IN      NS      ns.cfitech-it.com.
-@       IN      NS      ns2.cfitech-it.com.
-
-2       IN      PTR     ns.cfitech-it.com.
-3       IN      PTR     ns2.cfitech-it.com.
+$TTL 604800
+@       IN  SOA dns01.diarabaka.local. root.diarabaka.local. (
+                2         ; Serial
+           604800         ; Refresh
+            86400         ; Retry
+          2419200         ; Expire
+           604800 )       ; Negative Cache TTL
+;
+        IN  NS  dns01.diarabaka.local.
+172     IN  PTR dns01.diarabaka.local.
 ```
 
-- Avant de redémarrer Bind9, vérifiez les fichiers de configuration
-
-- Vérifie la syntaxe générale.
+#### Vérification de la configuration
 
 ```sh
-sudo named-checkconf
+sudo named-checkconf /etc/bind/named.conf.local
+sudo named-checkzone diarabaka.local /etc/bind/zones/db.diarabaka.local
+sudo named-checkzone 129.168.192.in-addr.arpa /etc/bind/zones/db.129.168.192
 ```
 
-- Vérifie la zone directe.
-
-```sh
-sudo named-checkzone cfitech-it.com /etc/bind/db.cfitech-it.com
-```
-
-- Vérifie la zone inversée.
-
-```sh
-sudo named-checkzone 1.168.192.in-addr.arpa /etc/bind/db.rev.cfitech-it.com
-```
-
-- Redémarrez Bind9 après vérification
-
-```sh
-sudo systemctl restart bind9 && sudo systemctl status bind9
-```
-
-#### Configuration du Serveur Secondaire (192.168.1.3)
-
-- Mise à jour du système
-
-```sh
-sudo apt update && sudo apt upgrade -y
-```
-
-- Installation de Bind9
-
-```sh
-sudo apt install bind9 bind9utils bind9-doc -y
-```
-
-- Activation du service
-
-```sh
-sudo systemctl enable bind9
-sudo systemctl start bind9
-```
-
-- Configuration du pare-feu
-
-```sh
-sudo ufw allow 53
-sudo ufw reload
-```
-
-- Configuration IP statique
-
-```sh
-network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    enp0s3:
-      dhcp4: false
-      addresses: [192.168.1.3/24]
-      routes:
-        - to: default
-          via: 192.168.1.1
-      nameservers:
-        addresses: [192.168.1.2, 192.168.1.3]
-```
-
-```sh
-sudo netplan apply
-```
-
-- Configuration des options Bind9
-
-```sh
-sudo nano /etc/bind/named.conf.options
-```
-
-```sh
-options {
-    directory "/var/cache/bind";
-    dnssec-validation auto;
-    listen-on { any; };
-    listen-on-v6 { any; };
-    allow-query { any; };
-    recursion yes;
-};
-```
-
-- Configuration des zones esclaves
-
-```sh
-sudo nano /etc/bind/named.conf.local
-```
-
-```sh
-zone "cfitech-it.com" {
-    type slave;
-    file "/var/cache/bind/db.cfitech-it.com";
-    masters { 192.168.1.2; };  # Adresse IP du serveur primaire.
-};
-
-zone "1.168.192.in-addr.arpa" {
-    type slave;
-    file "/var/cache/bind/db.rev.cfitech-it.com";
-    masters { 192.168.1.2; };  # Adresse IP du serveur primaire.
-};
-```
-
-- Vérification
-
-```sh
-sudo named-checkconf
-```
-
-- Redémarrage
+#### Redémarrage de BIND9
 
 ```sh
 sudo systemctl restart bind9
 sudo systemctl status bind9
 ```
 
-- Vérification du transfert de zone
+#### Configuration DNS locale (résolution)
 
 ```sh
-sudo ls -l /var/cache/bind/
+sudo nano /etc/resolv.conf
 ```
 
-- Tests depuis un client
+- Exemple
 
 ```sh
-# Test de résolution directe
-nslookup ns.cfitech-it.com 192.168.1.2
-nslookup www.cfitech-it.com 192.168.1.3
+nameserver 192.168.129.172
+nameserver 127.0.0.53
+options edns0 trust-ad
+search diarabaka.local
+```
 
-# Test de résolution inverse
-nslookup 192.168.1.2 192.168.1.2
-nslookup 192.168.1.3 192.168.1.3
+#### Pour éviter que resolv.conf soit écrasé
 
-# Test de transfert de zone
-dig @192.168.1.2 cfitech-it.com AXFR
-dig @192.168.1.3 cfitech-it.com AXFR
+```sh
+sudo cp /etc/resolv.conf /etc/resolv.conf.back
+sudo chattr +i /etc/resolv.conf.back
+sudo rm -f /etc/resolv.conf
+sudo cp /etc/resolv.conf.back /etc/resolv.conf
+```
+
+#### Tests de résolution DNS
+
+```sh
+host dns01.diarabaka.local
+ping dns01.diarabaka.local
+host dns01
+host 192.168.129.172
+```
+
+#### Sécurisation
+
+- Vérifier les permissions des fichiers
+
+```sh
+sudo chown -R bind:bind /etc/bind/zones
 ```
