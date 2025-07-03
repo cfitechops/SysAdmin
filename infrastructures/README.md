@@ -4,6 +4,14 @@
 
 - Plonger dans les infrastructures virtualisées avec Proxmox VE et Docker, tout en appliquant des compétences avancées en administration et sécurité.
 
+## Zabbix Monitoring
+
+- Supervision des systèmes et applications avec Zabbix
+
+- Mise en œuvre de la surveillance réseau avec Zabbix
+
+- Infrastructure de monitoring avec Zabbix : Installation, Scénarios Web, Alertes et Dashboards
+
 ## Concevoir et mettre en œuvre une solution en réponse à un besoin d’évolution
 
 - Créer des solutions techniques personnalisées répondant aux besoins d’évolution de l’infrastructure.
